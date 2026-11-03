@@ -1,4 +1,5 @@
 // Variáveis públicas (seguras para o navegador). Segredos nunca entram aqui.
+// Confere se uma configuração obrigatória existe; se faltar, avisa logo ao iniciar o sistema.
 function required(name: string, value: string | undefined): string {
   if (!value) {
     throw new Error(`Variável de ambiente ausente: ${name}. Veja .env.example.`);
@@ -6,6 +7,7 @@ function required(name: string, value: string | undefined): string {
   return value;
 }
 
+// Configurações do sistema: endereço do banco de dados, endereço do site e chave do teste anti-robô.
 export const env = {
   supabaseUrl: required("NEXT_PUBLIC_SUPABASE_URL", process.env.NEXT_PUBLIC_SUPABASE_URL),
   supabaseKey: required(

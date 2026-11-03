@@ -20,6 +20,7 @@ import {
 } from "../schemas";
 import { Turnstile } from "./turnstile";
 
+// Formulário de "esqueci minha senha": pede o e-mail e, depois de enviar, mostra uma confirmação.
 export function ForgotPasswordForm({ turnstileSiteKey }: { turnstileSiteKey: string | null }) {
   const [message, setMessage] = useState<string | null>(null);
   const form = useForm<ForgotPasswordInput>({
@@ -66,6 +67,7 @@ export function ForgotPasswordForm({ turnstileSiteKey }: { turnstileSiteKey: str
   );
 }
 
+// Formulário para escolher uma nova senha (usado na recuperação de senha e no perfil).
 export function ResetPasswordForm({ redirectTo }: { redirectTo?: string }) {
   const router = useRouter();
   const form = useForm<ResetPasswordInput>({

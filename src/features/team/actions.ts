@@ -9,10 +9,12 @@ import { createClient } from "@/lib/supabase/server";
 const uuid = z.string().uuid();
 const role = z.enum(["admin", "seller"]);
 
+// Atualiza as telas da empresa depois de uma alteração.
 function refresh(slug: string) {
   if (/^[a-z0-9-]{3,48}$/.test(slug)) revalidatePath(`/app/${slug}`, "layout");
 }
 
+// Regras do convite: e-mail e papel (administrador ou vendedor).
 const inviteSchema = z.object({
   companyId: uuid,
   email: z.string().trim().toLowerCase().email("Informe um e-mail válido.").max(254),
@@ -20,6 +22,7 @@ const inviteSchema = z.object({
 });
 
 // Retorna o link do convite (o token só existe em claro nesta resposta).
+// Cria um convite e devolve o link para enviar à pessoa.
 export async function createInvitation(
   input: z.input<typeof inviteSchema> & { slug: string },
 ): Promise<ActionResult<{ link: string; expiresAt: string }>> {
@@ -39,6 +42,7 @@ export async function createInvitation(
   );
 }
 
+// Cancela um convite que ainda não foi aceito.
 export async function revokeInvitation(input: {
   invitationId: string;
   slug: string;
@@ -51,6 +55,7 @@ export async function revokeInvitation(input: {
   return ok(undefined, "Convite revogado.");
 }
 
+// Muda o papel de um membro (administrador ou vendedor).
 export async function setMemberRole(input: {
   memberId: string;
   role: "admin" | "seller";
@@ -68,6 +73,7 @@ export async function setMemberRole(input: {
   return ok(undefined, input.role === "admin" ? "Promovido a administrador." : "Alterado para vendedor.");
 }
 
+// Ativa ou desativa o acesso de um membro à empresa.
 export async function setMemberStatus(input: {
   memberId: string;
   status: "active" | "inactive";

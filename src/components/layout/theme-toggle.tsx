@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+// Botão que abre um menu para escolher o tema: claro, escuro ou igual ao do computador.
 export function ThemeToggle() {
   const { setTheme } = useTheme();
   return (

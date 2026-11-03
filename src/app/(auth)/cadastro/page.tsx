@@ -8,8 +8,10 @@ import { env } from "@/lib/env";
 
 export const metadata: Metadata = { title: "Cadastro" };
 
+// Página de cadastro. Serve tanto para quem vai criar uma empresa quanto para quem recebeu um convite.
 export default async function SignUpPage({ searchParams }: PageProps<"/cadastro">) {
   const sp = await searchParams;
+  // Confere se veio um convite válido no endereço. Se a pessoa já estiver logada, não precisa se cadastrar.
   const invitationToken =
     typeof sp.convite === "string" && /^[a-f0-9]{64}$/.test(sp.convite) ? sp.convite : undefined;
   if (await getCurrentUser()) redirect(invitationToken ? `/convite/${invitationToken}` : "/app");

@@ -2,6 +2,7 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/database";
 
+// Quantas vendas aparecem por página.
 export const SALES_PAGE_SIZE = 25;
 
 export type SaleRow = Pick<
@@ -17,6 +18,7 @@ export type SaleRow = Pick<
   | "cancel_reason"
 > & { lead: { id: string; name: string } | null };
 
+// Filtros da lista de vendas: situação, vendedor, período e página.
 export type SaleFilters = {
   status: "all" | "pending" | "completed" | "cancelled";
   seller?: string;
@@ -26,6 +28,7 @@ export type SaleFilters = {
 };
 
 // Concluídas filtram pela data de conclusão; demais situações, pela data de registro.
+// Busca a lista de vendas com os filtros, em páginas de 25.
 export async function listSales(companyId: string, f: SaleFilters) {
   const supabase = await createClient();
   let q = supabase

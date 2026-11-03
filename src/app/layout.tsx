@@ -6,14 +6,17 @@ import { Toaster } from "@/components/ui/sonner";
 import { APP_NAME } from "@/lib/brand";
 import "./globals.css";
 
+// Fontes de letra usadas no sistema.
 const geistSans = Geist({ variable: "--font-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
+// Título e descrição que aparecem na aba do navegador e nos sites de busca.
 export const metadata: Metadata = {
   title: { default: APP_NAME, template: `%s · ${APP_NAME}` },
   description: "CRM comercial multiempresa: leads, funil, tarefas, vendas e relatórios.",
 };
 
+// Cor da barra do navegador no celular, conforme o tema claro ou escuro.
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
@@ -21,6 +24,8 @@ export const viewport: Viewport = {
   ],
 };
 
+// Estrutura base de todas as páginas: idioma, fontes, tema claro/escuro
+// e as mensagens de aviso que aparecem no canto da tela.
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html

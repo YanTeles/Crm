@@ -10,6 +10,8 @@ export type CustomValueMap = Record<string, string | number | null>;
 const NONE = "__none__";
 
 // Renderiza os campos personalizados ativos (e inativos que já tenham valor).
+// Mostra os campos extras criados pela empresa (texto, número, data ou lista de opções)
+// no formulário do lead.
 export function CustomFieldInputs({
   fields,
   values,
@@ -87,6 +89,7 @@ export function CustomFieldInputs({
   );
 }
 
+// Prepara os valores já salvos dos campos extras para preencher o formulário.
 export function initialCustomValues(
   rows: {
     field_id: string;

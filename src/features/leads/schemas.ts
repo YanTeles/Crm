@@ -1,6 +1,8 @@
+// Regras de preenchimento dos formulários de leads.
 import { z } from "zod";
 import { normalizePhone } from "@/lib/phone";
 
+// Valores dos campos extras.
 export const customValuesSchema = z.record(
   z.string().uuid(),
   z.union([z.string().max(2000), z.number(), z.null()]),
@@ -34,6 +36,7 @@ export const leadFormSchema = leadFormFields.transform((v) => ({
 export type LeadFormInput = z.infer<typeof leadFormFields>;
 export type LeadFormValues = z.output<typeof leadFormSchema>;
 
+// Formas de definir o responsável: nenhum, automático (rodízio) ou escolhido manualmente.
 export const assignmentSchema = z.discriminatedUnion("mode", [
   z.object({ mode: z.literal("none") }),
   z.object({ mode: z.literal("auto") }),
@@ -44,6 +47,7 @@ export type Assignment = z.infer<typeof assignmentSchema>;
 export const uuid = z.string().uuid();
 export const version = z.number().int().positive().optional();
 
+// Marcar como ganho: valor obrigatório.
 export const wonSchema = z.object({
   leadId: uuid,
   amount: z
@@ -53,6 +57,7 @@ export const wonSchema = z.object({
   version,
 });
 
+// Marcar como perdido: motivo obrigatório.
 export const lostSchema = z.object({
   leadId: uuid,
   reasonId: z.string().uuid("Selecione o motivo."),
@@ -60,6 +65,7 @@ export const lostSchema = z.object({
   version,
 });
 
+// Nova anotação ou contato.
 export const interactionSchema = z.object({
   leadId: uuid,
   kind: z.enum(["note", "contact"]),

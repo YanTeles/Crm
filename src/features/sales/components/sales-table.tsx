@@ -10,6 +10,7 @@ import { formatCurrency, formatDate } from "@/lib/format";
 import type { SaleRow } from "../queries";
 import { SaleRowActions } from "./sale-row-actions";
 
+// Tabela de vendas: lead, descrição, vendedor, situação, data e valor.
 export function SalesTable({ rows, members }: { rows: SaleRow[]; members: MemberOption[] }) {
   const ws = useWorkspace();
   const member = (id: string) => members.find((m) => m.userId === id)?.name ?? "—";

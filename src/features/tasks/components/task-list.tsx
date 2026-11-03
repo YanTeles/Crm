@@ -36,6 +36,8 @@ export type TaskItem = {
   lead: { id: string; name: string } | null;
 };
 
+// Lista de tarefas: caixa para concluir, título, prazo (em vermelho se atrasada),
+// responsável, lead ligado e opção de excluir.
 export function TaskList({
   tasks,
   members,

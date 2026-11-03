@@ -1,5 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
+// Tela de "carregando": mostra blocos cinzas no formato do conteúdo enquanto os dados chegam.
 export default function Loading() {
   return (
     <div className="space-y-6" aria-busy="true" aria-label="Carregando">

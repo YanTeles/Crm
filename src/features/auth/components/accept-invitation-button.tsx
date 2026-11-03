@@ -5,6 +5,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useAction } from "@/components/forms/use-action-form";
 import { acceptInvitation } from "../actions";
 
+// Botão de aceitar convite.
 export function AcceptInvitationButton({ token }: { token: string }) {
   const { pending, run } = useAction();
   return (

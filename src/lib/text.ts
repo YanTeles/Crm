@@ -1,3 +1,4 @@
+// Pega as iniciais do nome para mostrar na bolinha do usuário (ex.: Maria Souza → MS).
 export function initials(name: string): string {
   return (
     name

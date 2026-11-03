@@ -3,6 +3,7 @@
 import Script from "next/script";
 import { useEffect, useId, useRef } from "react";
 
+// Explica ao sistema como funciona o teste anti-robô da Cloudflare.
 declare global {
   interface Window {
     turnstile?: {
@@ -26,6 +27,7 @@ export function Turnstile({
   const ref = useRef<HTMLDivElement>(null);
   const id = useId();
 
+  // Espera o teste anti-robô carregar e então o mostra na tela.
   useEffect(() => {
     if (!siteKey) return;
     let widgetId: string | undefined;

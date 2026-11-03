@@ -39,6 +39,8 @@ import { setMemberRole, setMemberStatus } from "../actions";
 
 const NONE = "__none__";
 
+// Menu de ações de cada membro: mudar papel, ativar/desativar acesso
+// e transferir os leads dele para outra pessoa.
 export function MemberActions({
   member,
   members,

@@ -13,6 +13,8 @@ import { formatDate } from "@/lib/format";
 import { formatPhone } from "@/lib/phone";
 import type { LeadRow } from "../queries";
 
+// Tabela de leads: nome, contato, etapa, situação, origem, responsável e data.
+// Ao clicar em uma linha, abre os detalhes do lead.
 export function LeadsTable({
   rows,
   lookups,
@@ -24,6 +26,7 @@ export function LeadsTable({
 }) {
   const ws = useWorkspace();
   const router = useRouter();
+  // Atalhos para trocar códigos por nomes.
   const stage = (id: string) => lookups.stages.find((s) => s.id === id)?.name ?? "—";
   const source = (id: string | null) => lookups.sources.find((s) => s.id === id)?.name ?? "—";
   const member = (id: string | null) => lookups.members.find((m) => m.userId === id)?.name;
@@ -84,6 +87,7 @@ export function LeadsTable({
     },
   ];
 
+  // Mostra a tabela; se a lista estiver vazia, mostra uma mensagem adequada.
   return (
     <DataTable
       columns={columns}

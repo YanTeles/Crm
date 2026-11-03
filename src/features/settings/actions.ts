@@ -1,3 +1,5 @@
+// Operações das configurações da empresa: dados da empresa, etapas do funil,
+// origens, motivos de perda e campos extras.
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -8,6 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const uuid = z.string().uuid();
 
+// Atualiza as telas da empresa depois de uma alteração.
 function refresh(slug: string) {
   if (/^[a-z0-9-]{3,48}$/.test(slug)) revalidatePath(`/app/${slug}`, "layout");
 }
@@ -15,6 +18,7 @@ function refresh(slug: string) {
 // ---------------------------------------------------------------------------
 // Empresa
 // ---------------------------------------------------------------------------
+// Regras dos dados da empresa: nome, endereço, fuso horário e distribuição automática.
 const companySchema = z.object({
   companyId: uuid,
   name: z.string().trim().min(2, "Informe o nome.").max(120),
@@ -30,6 +34,7 @@ const companySchema = z.object({
   autoDistribution: z.boolean(),
 });
 
+// Salva os dados da empresa. Se o endereço mudar, leva a pessoa para o novo endereço.
 export async function updateCompany(
   input: z.input<typeof companySchema> & { currentSlug: string },
 ): Promise<ActionResult<undefined>> {
@@ -54,6 +59,7 @@ export async function updateCompany(
 // ---------------------------------------------------------------------------
 const stageName = z.string().trim().min(1, "Informe o nome.").max(60);
 
+// Cria uma nova etapa no funil.
 export async function createStage(input: {
   companyId: string;
   name: string;
@@ -68,6 +74,7 @@ export async function createStage(input: {
   return ok(undefined, "Etapa criada.");
 }
 
+// Muda o nome de uma etapa.
 export async function renameStage(input: {
   stageId: string;
   name: string;
@@ -82,6 +89,7 @@ export async function renameStage(input: {
   return ok(undefined, "Etapa renomeada.");
 }
 
+// Salva a nova ordem das etapas.
 export async function reorderStages(input: {
   companyId: string;
   stageIds: string[];
@@ -98,6 +106,7 @@ export async function reorderStages(input: {
   return ok(undefined);
 }
 
+// Define qual etapa recebe os leads novos.
 export async function setDefaultStage(input: {
   stageId: string;
   slug: string;
@@ -109,6 +118,7 @@ export async function setDefaultStage(input: {
   return ok(undefined, "Etapa inicial atualizada.");
 }
 
+// Remove uma etapa, movendo os leads dela para outra etapa escolhida.
 export async function archiveStage(input: {
   stageId: string;
   targetStageId: string | null;
@@ -127,9 +137,11 @@ export async function archiveStage(input: {
 // ---------------------------------------------------------------------------
 // Origens e motivos de perda
 // ---------------------------------------------------------------------------
+// Listas simples de opções: origens dos leads e motivos de perda.
 type OptionTable = "lead_sources" | "lost_reasons";
 const optionName = z.string().trim().min(1, "Informe o nome.").max(80);
 
+// Cria uma nova opção na lista.
 export async function createOption(input: {
   table: OptionTable;
   companyId: string;
@@ -155,6 +167,7 @@ export async function createOption(input: {
   return ok(undefined, "Item adicionado.");
 }
 
+// Renomeia, ativa ou desativa uma opção.
 export async function updateOption(input: {
   table: OptionTable;
   id: string;
@@ -180,6 +193,7 @@ export async function updateOption(input: {
   return ok(undefined, input.isActive === false ? "Item desativado." : "Item atualizado.");
 }
 
+// Exclui uma opção (se ela já foi usada, o sistema pede para desativar em vez de excluir).
 export async function deleteOption(input: {
   table: OptionTable;
   id: string;
@@ -199,6 +213,7 @@ export async function deleteOption(input: {
 // ---------------------------------------------------------------------------
 // Campos personalizados
 // ---------------------------------------------------------------------------
+// Regras dos campos extras: nome, tipo e se é obrigatório.
 const fieldSchema = z.object({
   companyId: uuid,
   label: z.string().trim().min(1, "Informe o nome do campo.").max(80),
@@ -206,6 +221,7 @@ const fieldSchema = z.object({
   isRequired: z.boolean(),
 });
 
+// Cria um código interno a partir do nome do campo (ex.: "Data de Nascimento" → data_de_nascimento).
 function keyFromLabel(label: string) {
   const base = label
     .normalize("NFD")
@@ -218,6 +234,7 @@ function keyFromLabel(label: string) {
   return base || "campo";
 }
 
+// Cria um campo extra.
 export async function createField(
   input: z.input<typeof fieldSchema> & { slug: string },
 ): Promise<ActionResult<undefined>> {
@@ -247,6 +264,7 @@ export async function createField(
   return ok(undefined, "Campo criado.");
 }
 
+// Altera um campo extra.
 export async function updateField(input: {
   id: string;
   label?: string;
@@ -271,6 +289,7 @@ export async function updateField(input: {
   return ok(undefined, "Campo atualizado.");
 }
 
+// Exclui um campo extra.
 export async function deleteField(input: { id: string; slug: string }): Promise<ActionResult<undefined>> {
   if (!uuid.safeParse(input.id).success) return fail("Campo inválido.");
   const supabase = await createClient();
@@ -281,6 +300,7 @@ export async function deleteField(input: { id: string; slug: string }): Promise<
   return ok(undefined, "Campo excluído.");
 }
 
+// Adiciona uma opção a um campo do tipo lista.
 export async function createFieldOption(input: {
   companyId: string;
   fieldId: string;
@@ -298,6 +318,7 @@ export async function createFieldOption(input: {
   return ok(undefined, "Opção adicionada.");
 }
 
+// Altera uma opção de um campo do tipo lista.
 export async function updateFieldOption(input: {
   id: string;
   isActive: boolean;
@@ -315,6 +336,7 @@ export async function updateFieldOption(input: {
   return ok(undefined, input.isActive ? "Opção reativada." : "Opção desativada.");
 }
 
+// Exclui uma opção de um campo do tipo lista.
 export async function deleteFieldOption(input: {
   id: string;
   slug: string;

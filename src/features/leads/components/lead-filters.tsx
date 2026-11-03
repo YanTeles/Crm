@@ -12,12 +12,15 @@ import type { ClientLookups } from "@/features/workspace/lookups";
 
 const ALL = "__all__";
 
+// Filtros da lista de leads: busca por nome ou telefone, situação, etapa, responsável,
+// origem e campos extras. Cada escolha fica guardada no endereço da página.
 export function LeadFilters({ lookups }: { lookups: ClientLookups }) {
   const ws = useWorkspace();
   const { params, set, pending } = useUrlState();
   const [q, setQ] = useState(params.get("q") ?? "");
 
   // Busca com debounce
+  // Espera a pessoa parar de digitar um instante antes de aplicar a busca.
   useEffect(() => {
     const current = params.get("q") ?? "";
     if (q === current) return;
@@ -30,6 +33,7 @@ export function LeadFilters({ lookups }: { lookups: ClientLookups }) {
     ["q", "etapa", "responsavel", "origem", "campo", "valor"].some((k) => params.get(k)) ||
     (params.get("status") ?? "open") !== "open";
 
+  // Atalho para criar uma caixa de seleção de filtro.
   const select = (
     key: string,
     placeholder: string,

@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 
+// Números do resumo: faturamento, vendas, valor médio, leads criados, ganhos, perdas e pendências.
 export type Summary = {
   leads_created: number;
   leads_converted: number;
@@ -15,6 +16,7 @@ export type Summary = {
   pending_amount: number;
 };
 
+// Filtros dos relatórios: período, vendedor e origem.
 export type ReportFilters = {
   from: string;
   to: string;
@@ -23,6 +25,7 @@ export type ReportFilters = {
   stage?: string | null;
 };
 
+// Resumo zerado, usado quando não há dados.
 const EMPTY: Summary = {
   leads_created: 0,
   leads_converted: 0,
@@ -39,6 +42,7 @@ const EMPTY: Summary = {
 
 // Todas as funções de relatório rodam com a RLS do usuário; vendedor é
 // automaticamente restrito aos próprios indicadores no banco.
+// Busca os números do resumo no período escolhido.
 export async function getSummary(companyId: string, f: ReportFilters): Promise<Summary> {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("report_summary", {
@@ -70,6 +74,7 @@ export async function getSummary(companyId: string, f: ReportFilters): Promise<S
   };
 }
 
+// Busca os números mês a mês (para os gráficos).
 export async function getMonthly(companyId: string, f: ReportFilters) {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("report_monthly", {
@@ -88,6 +93,7 @@ export async function getMonthly(companyId: string, f: ReportFilters) {
   }));
 }
 
+// Busca os resultados de cada vendedor (para o ranking).
 export async function getBySeller(companyId: string, f: ReportFilters) {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("report_by_seller", {
@@ -107,6 +113,7 @@ export async function getBySeller(companyId: string, f: ReportFilters) {
   }));
 }
 
+// Busca quantos leads vieram de cada origem.
 export async function getBySource(companyId: string, f: ReportFilters) {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("report_by_source", {
@@ -123,6 +130,7 @@ export async function getBySource(companyId: string, f: ReportFilters) {
   }));
 }
 
+// Busca quantas oportunidades foram perdidas por cada motivo.
 export async function getLostReasons(companyId: string, f: ReportFilters) {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("report_lost_reasons", {

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { dbFail, invalid, ok, type ActionResult } from "@/lib/action";
 import { createClient } from "@/lib/supabase/server";
 
+// Salva o novo nome da pessoa e atualiza as telas.
 export async function updateProfileName(input: { fullName: string }): Promise<ActionResult<undefined>> {
   const parsed = z
     .object({ fullName: z.string().trim().min(2, "Informe seu nome.").max(120) })

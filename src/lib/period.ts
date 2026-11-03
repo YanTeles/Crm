@@ -1,5 +1,6 @@
 import { periodRange, type PeriodKey } from "@/lib/dates";
 
+// Períodos que podem ser escolhidos nos filtros.
 const KEYS: PeriodKey[] = ["this_month", "last_month", "last_90", "this_year", "last_12m", "custom"];
 
 // Lê período dos searchParams (padrão: mês corrente no fuso da empresa).

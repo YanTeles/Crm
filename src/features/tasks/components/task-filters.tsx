@@ -8,6 +8,7 @@ import type { MemberOption } from "@/features/workspace/lookups";
 
 const ALL = "__all__";
 
+// Abas de tarefas (com a quantidade de cada uma) e filtro por responsável para administradores.
 export function TaskFilters({
   views,
   counts,

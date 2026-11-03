@@ -1,3 +1,4 @@
+/* Estilo visual de todo o sistema: cores do tema claro e do tema escuro, fontes e cantos arredondados. */
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";

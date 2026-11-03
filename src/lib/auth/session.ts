@@ -1,3 +1,5 @@
+// Funções que descobrem quem está usando o sistema, de qual empresa a pessoa faz parte
+// e o que ela tem permissão para fazer.
 import "server-only";
 import { cache } from "react";
 import { notFound, redirect } from "next/navigation";
@@ -21,12 +23,14 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   };
 });
 
+// Exige que a pessoa esteja logada; se não estiver, manda para a tela de login.
 export async function requireUser(next?: string): Promise<CurrentUser> {
   const user = await getCurrentUser();
   if (!user) redirect(next ? `/entrar?next=${encodeURIComponent(next)}` : "/entrar");
   return user;
 }
 
+// Vínculo da pessoa com a empresa: se é administrador ou vendedor e se está ativo.
 export type Membership = {
   id: string;
   role: Enums<"member_role">;
@@ -78,6 +82,7 @@ export async function requireWorkspace(slug: string, opts: { admin?: boolean } =
   return ws;
 }
 
+// Verifica se a pessoa é administradora da plataforma inteira (cuida de todas as empresas).
 export const isPlatformAdmin = cache(async (): Promise<boolean> => {
   const user = await getCurrentUser();
   if (!user) return false;

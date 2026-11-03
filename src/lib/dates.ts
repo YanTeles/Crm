@@ -3,6 +3,7 @@
 
 type Parts = { year: number; month: number; day: number; hour: number; minute: number; second: number };
 
+// Descobre que dia e hora o relógio marca em um certo fuso horário, em um momento qualquer.
 function partsInZone(date: Date, timeZone: string): Parts {
   const fmt = new Intl.DateTimeFormat("en-US", {
     timeZone,
@@ -25,6 +26,7 @@ function partsInZone(date: Date, timeZone: string): Parts {
   };
 }
 
+// Calcula a diferença de horas entre um fuso horário e o horário universal.
 function offsetMs(date: Date, timeZone: string): number {
   const p = partsInZone(date, timeZone);
   const asUtc = Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second);
@@ -46,6 +48,7 @@ export function zonedToUtc(
   return new Date(guess.getTime() - offsetMs(first, timeZone));
 }
 
+// Diz qual é a data de hoje no fuso horário da empresa.
 export function todayInZone(
   timeZone: string,
   now = new Date(),
@@ -77,6 +80,7 @@ export function localDateToIso(value: string, timeZone: string, endOfDay = false
   return zonedToUtc(+m[1], +m[2], +m[3] + 1, 0, 0, timeZone).toISOString();
 }
 
+// Calcula o começo e o fim de um dia (hoje, amanhã, ontem...) no fuso da empresa.
 export type DayRange = { from: Date; to: Date };
 
 export function dayRange(timeZone: string, offsetDays = 0, now = new Date()): DayRange {
@@ -87,6 +91,8 @@ export function dayRange(timeZone: string, offsetDays = 0, now = new Date()): Da
   };
 }
 
+// Transforma o período escolhido nos filtros (este mês, mês passado, últimos 90 dias...)
+// em uma data de início e uma data de fim.
 export type PeriodKey = "this_month" | "last_month" | "last_90" | "this_year" | "last_12m" | "custom";
 
 export function periodRange(

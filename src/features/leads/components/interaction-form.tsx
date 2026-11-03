@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { addInteraction } from "../actions";
 
+// Canais de contato que podem ser escolhidos.
 const CHANNELS = [
   { value: "phone", label: "Telefone" },
   { value: "whatsapp", label: "WhatsApp" },
@@ -18,6 +19,8 @@ const CHANNELS = [
   { value: "other", label: "Outro" },
 ] as const;
 
+// Formulário para registrar uma anotação ou um contato feito com o lead
+// (por telefone, WhatsApp, e-mail, reunião...).
 export function InteractionForm({ leadId }: { leadId: string }) {
   const ws = useWorkspace();
   const { pending, run } = useAction();

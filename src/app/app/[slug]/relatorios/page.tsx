@@ -23,13 +23,16 @@ import { periodFromParams } from "@/lib/period";
 
 export const metadata: Metadata = { title: "Relatórios" };
 
+// Aceita o filtro só se for um código válido.
 const uuidParam = (v: unknown) => (typeof v === "string" && /^[0-9a-f-]{36}$/i.test(v) ? v : undefined);
 
+// Página de relatórios: números, gráficos e ranking de vendedores no período escolhido.
 export default async function ReportsPage({ params, searchParams }: PageProps<"/app/[slug]/relatorios">) {
   const { slug } = await params;
   const ws = await requireWorkspace(slug);
   const sp = await searchParams;
   const period = periodFromParams(sp, ws.company.timezone);
+  // Filtros aplicados. O vendedor sempre vê só os próprios resultados.
   const filters = {
     from: period.from,
     to: period.to,
@@ -37,6 +40,7 @@ export default async function ReportsPage({ params, searchParams }: PageProps<"/
     source: uuidParam(sp.origem),
   };
 
+  // Busca todos os relatórios ao mesmo tempo.
   const [lookups, summary, monthly, sellers, sources, reasons] = await Promise.all([
     getLookups(ws.company.id),
     getSummary(ws.company.id, filters),
@@ -55,6 +59,7 @@ export default async function ReportsPage({ params, searchParams }: PageProps<"/
       />
       <ReportFilters members={cl.members} sources={cl.sources} isAdmin={ws.isAdmin} />
 
+      {/* Cartões com os principais números. */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Faturamento"
@@ -95,6 +100,7 @@ export default async function ReportsPage({ params, searchParams }: PageProps<"/
         />
       </div>
 
+      {/* Gráficos: faturamento, leads, origens e motivos de perda. */}
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
@@ -142,6 +148,7 @@ export default async function ReportsPage({ params, searchParams }: PageProps<"/
         </Card>
       </div>
 
+      {/* Ranking de vendedores (só para administradores). */}
       {ws.isAdmin ? (
         <Card className="mt-6">
           <CardHeader>

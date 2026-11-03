@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Convite" };
 
+// Mensagens para cada motivo de o convite não poder mais ser usado.
 const STATUS_MESSAGE: Record<string, string> = {
   accepted: "Este convite já foi utilizado.",
   revoked: "Este convite foi revogado pelo administrador.",
@@ -16,11 +17,13 @@ const STATUS_MESSAGE: Record<string, string> = {
   company_suspended: "A empresa deste convite está suspensa.",
 };
 
+// Página de convite para entrar em uma empresa.
 export default async function InvitationPage({ params }: PageProps<"/convite/[token]">) {
   const { token } = await params;
   const valid = /^[a-f0-9]{64}$/.test(token);
   const user = await getCurrentUser();
 
+  // Se a pessoa não está logada, oferece criar uma conta ou entrar.
   if (!user) {
     return (
       <AuthShell
@@ -39,10 +42,12 @@ export default async function InvitationPage({ params }: PageProps<"/convite/[to
     );
   }
 
+  // Busca os dados do convite.
   const supabase = await createClient();
   const { data } = valid ? await supabase.rpc("get_invitation", { p_token: token }) : { data: null };
   const invitation = data?.[0];
 
+  // Se o convite não existe ou não vale mais, mostra o motivo.
   if (!invitation || invitation.status !== "pending") {
     return (
       <AuthShell title="Convite indisponível">
@@ -58,6 +63,7 @@ export default async function InvitationPage({ params }: PageProps<"/convite/[to
     );
   }
 
+  // Convite válido: mostra a empresa e o botão de aceitar.
   return (
     <AuthShell
       title={`Entrar em ${invitation.company_name}`}

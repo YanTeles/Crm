@@ -35,6 +35,7 @@ import type { KanbanCard } from "../queries";
 type Board = Record<string, { cards: KanbanCard[]; total: number }>;
 const PAGE = 30;
 // Colunas de fechamento exibem os últimos 30 dias.
+// Data limite para mostrar leads já encerrados no quadro.
 function closedSince() {
   return new Date(new Date().getTime() - 30 * 86400_000).toISOString();
 }
@@ -42,6 +43,7 @@ function closedSince() {
 const CARD_COLUMNS =
   "id, name, customer_company, assigned_to, stage_id, outcome, won_amount, row_version, updated_at";
 
+// Quadro do funil: colunas por etapa, com cartões que podem ser arrastados de uma etapa para outra.
 export function KanbanBoard({
   initial,
   lookups,
@@ -60,14 +62,17 @@ export function KanbanBoard({
   const [, startTransition] = useTransition();
 
   const stages = lookups.stages.filter((s) => !s.archived_at);
+  // Configura o arrastar com mouse, toque e teclado.
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 6 } }),
     useSensor(KeyboardSensor),
   );
   const memberName = (id: string | null) => lookups.members.find((m) => m.userId === id)?.name ?? null;
+  // Só pode mover leads em aberto; o vendedor só move os próprios leads.
   const canMove = (c: KanbanCard) => c.outcome === "open" && (ws.isAdmin || c.assigned_to === ws.userId);
 
+  // Move o cartão na tela na hora, antes mesmo da resposta do servidor (a tela fica mais ágil).
   function moveLocal(card: KanbanCard, toStage: string) {
     setBoard((b) => {
       const from = b[card.stage_id];
@@ -84,10 +89,13 @@ export function KanbanBoard({
     });
   }
 
+  // Quando a pessoa começa a arrastar um cartão.
   function onDragStart(e: DragStartEvent) {
     setActive((e.active.data.current?.card as KanbanCard) ?? null);
   }
 
+  // Quando a pessoa solta o cartão: se for em "Ganho" ou "Perdido", abre a janela de confirmação;
+  // senão, salva a nova etapa. Se der erro, o cartão volta para o lugar.
   function onDragEnd(e: DragEndEvent) {
     setActive(null);
     const card = e.active.data.current?.card as KanbanCard | undefined;
@@ -115,6 +123,7 @@ export function KanbanBoard({
     });
   }
 
+  // Carrega mais cartões de uma coluna (botão "Carregar mais").
   async function loadMore(stageId: string) {
     const col = board[stageId];
     const stage = stages.find((s) => s.id === stageId);
@@ -141,6 +150,7 @@ export function KanbanBoard({
     }));
   }
 
+  // Desenha o quadro e as janelas de ganho e perda.
   return (
     <>
       <DndContext
@@ -208,6 +218,7 @@ export function KanbanBoard({
   );
 }
 
+// Uma coluna do quadro (uma etapa), com o nome e a quantidade de leads.
 function Column({
   id,
   title,
@@ -242,6 +253,7 @@ function Column({
   );
 }
 
+// Cartão que pode ser arrastado.
 function DraggableCard({
   card,
   disabled,
@@ -274,6 +286,7 @@ function DraggableCard({
   );
 }
 
+// Aparência do cartão: nome do lead, empresa, responsável e valor.
 function CardView({
   card,
   assignee,

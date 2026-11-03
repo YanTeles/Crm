@@ -1,3 +1,5 @@
+// Listas de apoio da empresa usadas em várias telas: etapas do funil, origens,
+// motivos de perda, membros da equipe e campos extras.
 import "server-only";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
@@ -61,6 +63,7 @@ export const getLookups = cache(async (companyId: string) => {
       .order("label"),
   ]);
 
+  // Organiza os membros com nome e e-mail.
   const memberList: MemberOption[] = (members.data ?? []).map((m) => ({
     memberId: m.id,
     userId: m.user_id,
@@ -70,6 +73,7 @@ export const getLookups = cache(async (companyId: string) => {
     status: m.status,
   }));
 
+  // Junta cada campo extra com as suas opções.
   const customFields: CustomFieldDef[] = (fields.data ?? []).map((f) => ({
     ...f,
     options: (options.data ?? []).filter((o) => o.field_id === f.id),

@@ -9,6 +9,7 @@ export function normalizePhone(raw: string): string | null {
   return parsed.number;
 }
 
+// Mostra o telefone de forma fácil de ler, como (11) 99999-8888.
 export function formatPhone(e164: string): string {
   const parsed = parsePhoneNumberFromString(e164);
   if (!parsed) return e164;

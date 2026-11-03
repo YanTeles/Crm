@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { Enums } from "@/types/database";
 
+// Etiquetas coloridas da situação do lead: em aberto, ganho ou perdido.
 const OUTCOME: Record<Enums<"lead_outcome">, { label: string; className: string }> = {
   open: { label: "Em aberto", className: "bg-blue-500/10 text-blue-700 dark:text-blue-300" },
   won: { label: "Ganho", className: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" },
@@ -14,6 +15,7 @@ export function OutcomeBadge({ outcome, archived }: { outcome: Enums<"lead_outco
   return <Badge className={cn("border-transparent", o.className)}>{o.label}</Badge>;
 }
 
+// Etiquetas da situação da venda: pendente, concluída ou cancelada.
 const SALE: Record<Enums<"sale_status">, { label: string; className: string }> = {
   pending: { label: "Pendente", className: "bg-amber-500/10 text-amber-700 dark:text-amber-300" },
   completed: { label: "Concluída", className: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" },
@@ -25,6 +27,7 @@ export function SaleStatusBadge({ status }: { status: Enums<"sale_status"> }) {
   return <Badge className={cn("border-transparent", s.className)}>{s.label}</Badge>;
 }
 
+// Etiqueta da tarefa: concluída, atrasada ou pendente.
 export function TaskStatusBadge({ status, overdue }: { status: Enums<"task_status">; overdue: boolean }) {
   if (status === "done")
     return (

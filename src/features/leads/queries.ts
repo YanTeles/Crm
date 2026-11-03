@@ -4,6 +4,7 @@ import { escapeLike, normalizeSearch } from "@/lib/text";
 import type { Tables } from "@/types/database";
 import type { CustomFieldDef } from "@/features/workspace/lookups";
 
+// Quantos leads aparecem por página.
 export const LEADS_PAGE_SIZE = 25;
 
 export type LeadFilters = {
@@ -17,6 +18,7 @@ export type LeadFilters = {
   page?: number;
 };
 
+// Lê os filtros do endereço da página, aceitando só valores válidos.
 export function parseLeadFilters(sp: Record<string, string | string[] | undefined>): LeadFilters {
   const one = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string) : undefined);
   const isUuid = (v?: string) => (v && /^[0-9a-f-]{36}$/i.test(v) ? v : undefined);
@@ -54,6 +56,8 @@ export type LeadRow = Pick<
 const LEAD_COLUMNS =
   "id, name, phone_normalized, email, customer_company, outcome, stage_id, source_id, assigned_to, won_amount, created_at, updated_at, archived_at, row_version";
 
+// Busca a lista de leads aplicando os filtros (situação, etapa, origem, responsável,
+// busca por nome ou telefone e campos extras), em páginas de 25.
 export async function listLeads(companyId: string, f: LeadFilters, fields: CustomFieldDef[]) {
   const supabase = await createClient();
   const field = f.field ? fields.find((x) => x.id === f.field) : undefined;
@@ -112,12 +116,14 @@ export async function listLeads(companyId: string, f: LeadFilters, fields: Custo
   return { rows: (data ?? []) as unknown as LeadRow[], total: count ?? 0, error: false };
 }
 
+// Busca um lead pelo código.
 export async function getLead(leadId: string) {
   const supabase = await createClient();
   const { data } = await supabase.from("leads").select("*").eq("id", leadId).maybeSingle();
   return data;
 }
 
+// Busca tudo de um lead: campos extras, histórico, anotações, tarefas e vendas.
 export async function getLeadDetail(leadId: string) {
   const supabase = await createClient();
   const [values, events, interactions, tasks, sales] = await Promise.all([

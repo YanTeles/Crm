@@ -1,3 +1,4 @@
+// Configuração dos testes automáticos das funções do sistema.
 import path from "node:path";
 import { defineConfig } from "vitest/config";
 

@@ -7,6 +7,7 @@ import type { MemberOption, NamedOption } from "@/features/workspace/lookups";
 
 const ALL = "__all__";
 
+// Filtros dos relatórios: período, vendedor (só administradores) e origem.
 export function ReportFilters({
   members,
   sources,

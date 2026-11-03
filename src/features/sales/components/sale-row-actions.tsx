@@ -27,6 +27,7 @@ import { cancelSale, completeSale } from "../actions";
 import { SaleDialog, type EditableSale } from "./sale-dialog";
 
 // D2: vendedor altera só as próprias vendas pendentes; admin altera qualquer venda não cancelada.
+// Menu de cada venda: editar, concluir ou cancelar (o cancelamento pede um motivo).
 export function SaleRowActions({ sale, members }: { sale: EditableSale; members: MemberOption[] }) {
   const ws = useWorkspace();
   const { pending, run } = useAction();

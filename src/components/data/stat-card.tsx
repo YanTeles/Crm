@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
+// Cartão que mostra um número importante (por exemplo, faturamento), com título, ícone e uma dica opcional.
 export function StatCard({
   label,
   value,

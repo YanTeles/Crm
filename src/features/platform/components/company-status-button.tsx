@@ -17,6 +17,8 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { setCompanyStatus } from "../actions";
 
+// Botão de suspender/reativar empresa, com uma janela de confirmação.
+// Para suspender, é preciso escrever o motivo.
 export function CompanyStatusButton({
   companyId,
   name,

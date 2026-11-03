@@ -1,3 +1,4 @@
+// Configuração dos testes que abrem o sistema em um navegador de verdade e simulam o uso.
 import { defineConfig, devices } from "@playwright/test";
 
 const port = Number(process.env.E2E_PORT ?? 3100);

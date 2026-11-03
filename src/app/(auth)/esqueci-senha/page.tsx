@@ -6,6 +6,7 @@ import { env } from "@/lib/env";
 
 export const metadata: Metadata = { title: "Recuperar senha" };
 
+// Tela para pedir, por e-mail, um link de troca de senha.
 export default function ForgotPasswordPage() {
   return (
     <AuthShell

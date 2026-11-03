@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Criar empresa" };
 
+// Tela onde a pessoa cria a sua empresa logo após o cadastro.
 export default async function OnboardingPage() {
   const user = await requireUser("/onboarding");
   const supabase = await createClient();
@@ -20,6 +21,7 @@ export default async function OnboardingPage() {
   if (own) redirect(`/app/${own.slug}/dashboard`);
 
   const { data: auth } = await supabase.auth.getUser();
+  // Sugere o nome de empresa que a pessoa digitou no cadastro.
   const suggested = String(auth.user?.user_metadata?.company_name ?? "").slice(0, 120);
 
   return (

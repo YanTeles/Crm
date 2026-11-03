@@ -49,6 +49,8 @@ type Lead = Pick<
 
 const NONE = "__none__";
 
+// Barra de botões do lead: WhatsApp, mudar etapa, trocar responsável,
+// marcar como ganho ou perdido, reabrir e arquivar.
 export function LeadActions({ lead, lookups }: { lead: Lead; lookups: ClientLookups }) {
   const ws = useWorkspace();
   const { pending, run } = useAction();
@@ -148,6 +150,7 @@ export function LeadActions({ lead, lookups }: { lead: Lead; lookups: ClientLook
   );
 }
 
+// Janela para reabrir uma oportunidade encerrada, escolhendo a etapa em que ela volta.
 function ReopenDialog({ lead, lookups }: { lead: Lead; lookups: ClientLookups }) {
   const ws = useWorkspace();
   const { pending, run } = useAction();
@@ -201,6 +204,7 @@ function ReopenDialog({ lead, lookups }: { lead: Lead; lookups: ClientLookups })
   );
 }
 
+// Janela para escolher o novo responsável pelo lead (as tarefas pendentes podem ir junto).
 function AssignDialog({ lead, lookups }: { lead: Lead; lookups: ClientLookups }) {
   const ws = useWorkspace();
   const { pending, run } = useAction();

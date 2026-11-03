@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 export type PickedLead = { id: string; name: string };
 
 // Busca de leads acessíveis ao usuário (a RLS limita o vendedor aos próprios).
+// Campo de busca para escolher um lead (usado ao criar tarefas e vendas).
 export function LeadPicker({
   id,
   value,

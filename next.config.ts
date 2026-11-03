@@ -1,3 +1,4 @@
+// Configurações do site, incluindo proteções de segurança enviadas ao navegador em todas as páginas.
 import type { NextConfig } from "next";
 
 const securityHeaders = [

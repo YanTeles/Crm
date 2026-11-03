@@ -15,6 +15,7 @@ import type { Tables } from "@/types/database";
 
 type Notification = Tables<"notifications">;
 
+// Monta o texto e o link de cada aviso (lead recebido, tarefa atrasada etc.).
 function describe(n: Notification, base: string) {
   const data = (n.data ?? {}) as Record<string, string | number | null>;
   switch (n.type) {
@@ -37,10 +38,12 @@ function describe(n: Notification, base: string) {
   }
 }
 
+// Sininho de notificações no topo da tela, com a contagem de avisos não lidos.
 export function NotificationBell() {
   const ws = useWorkspace();
   const supabase = createClient();
   const qc = useQueryClient();
+  // Busca os avisos mais recentes da pessoa.
   const key = ["notifications", ws.companyId, ws.userId];
 
   const { data = [] } = useQuery({
@@ -61,6 +64,7 @@ export function NotificationBell() {
   });
 
   // Realtime: apenas as notificações do próprio usuário (a RLS também filtra).
+  // Fica "escutando" o banco: quando chega um aviso novo, a lista é atualizada na hora.
   useEffect(() => {
     const channel = supabase
       .channel(`notifications:${ws.userId}`)
@@ -76,6 +80,7 @@ export function NotificationBell() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ws.userId, ws.companyId]);
 
+  // Marca os avisos como lidos.
   const update = useMutation({
     mutationFn: async ({ ids, field }: { ids: string[]; field: "read_at" | "dismissed_at" }) => {
       if (!ids.length) return;
@@ -92,6 +97,7 @@ export function NotificationBell() {
   const unread = data.filter((n) => !n.read_at);
   const base = `/app/${ws.slug}`;
 
+  // Botão do sininho e a lista de avisos que se abre ao clicar.
   return (
     <Popover>
       <PopoverTrigger asChild>

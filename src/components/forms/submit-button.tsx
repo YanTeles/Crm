@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 
+// Botão de enviar formulário: mostra um ícone girando e fica bloqueado enquanto a operação está em andamento.
 export function SubmitButton({
   pending,
   children,

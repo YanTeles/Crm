@@ -11,9 +11,11 @@ import { requireWorkspace } from "@/lib/auth/session";
 
 export const metadata: Metadata = { title: "Leads" };
 
+// Página de leads: lista com busca, filtros e troca de página.
 export default async function LeadsPage({ params, searchParams }: PageProps<"/app/[slug]/leads">) {
   const { slug } = await params;
   const ws = await requireWorkspace(slug);
+  // Lê os filtros, busca os leads e verifica se algum filtro está ativo.
   const filters = parseLeadFilters(await searchParams);
   const lookups = await getLookups(ws.company.id);
   const { rows, total, error } = await listLeads(ws.company.id, filters, lookups.customFields);
@@ -34,6 +36,7 @@ export default async function LeadsPage({ params, searchParams }: PageProps<"/ap
         actions={<LeadSheet lookups={clientLookups(lookups)} />}
       />
       <LeadFilters lookups={clientLookups(lookups)} />
+      {/* Aviso caso os leads não possam ser carregados. */}
       {error ? (
         <Alert variant="destructive" className="mb-4">
           <AlertDescription>Não foi possível carregar os leads. Tente novamente.</AlertDescription>

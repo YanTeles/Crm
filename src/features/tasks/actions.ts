@@ -5,6 +5,7 @@ import { z } from "zod";
 import { dbFail, fail, invalid, ok, type ActionResult } from "@/lib/action";
 import { createClient } from "@/lib/supabase/server";
 
+// Regras do formulário de tarefa: título, descrição (opcional), prazo, responsável e lead (opcional).
 const taskSchema = z.object({
   title: z.string().trim().min(1, "Informe o título.").max(200),
   description: z
@@ -21,10 +22,12 @@ export type TaskInput = z.input<typeof taskSchema>;
 
 const uuid = z.string().uuid();
 
+// Atualiza as telas da empresa depois de uma alteração.
 function refresh(slug: string) {
   if (/^[a-z0-9-]{3,48}$/.test(slug)) revalidatePath(`/app/${slug}`, "layout");
 }
 
+// Cria uma nova tarefa.
 export async function createTask(
   input: TaskInput & { companyId: string; slug: string },
 ): Promise<ActionResult<undefined>> {
@@ -45,6 +48,7 @@ export async function createTask(
   return ok(undefined, "Tarefa criada.");
 }
 
+// Salva as alterações de uma tarefa.
 export async function updateTask(
   input: TaskInput & { taskId: string; slug: string },
 ): Promise<ActionResult<undefined>> {
@@ -69,6 +73,7 @@ export async function updateTask(
   return ok(undefined, "Tarefa atualizada.");
 }
 
+// Marca uma tarefa como concluída ou volta para pendente.
 export async function setTaskDone(input: {
   taskId: string;
   done: boolean;
@@ -87,6 +92,7 @@ export async function setTaskDone(input: {
   return ok(undefined, input.done ? "Tarefa concluída." : "Tarefa reaberta.");
 }
 
+// Exclui uma tarefa.
 export async function deleteTask(input: { taskId: string; slug: string }): Promise<ActionResult<undefined>> {
   if (!uuid.safeParse(input.taskId).success) return fail("Tarefa inválida.");
   const supabase = await createClient();

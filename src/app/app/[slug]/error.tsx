@@ -11,6 +11,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 
+// Tela mostrada quando acontece um erro inesperado, com um botão para tentar de novo.
 export default function WorkspaceError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
     <Empty className="min-h-[60svh]">

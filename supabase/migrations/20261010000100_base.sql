@@ -1,6 +1,8 @@
 -- =============================================================================
 -- Base: extensões, schemas, privilégios padrão, tipos e utilitários
 -- =============================================================================
+-- Em resumo: prepara o banco de dados com recursos extras, os tipos de valores usados
+-- (situação do lead, papel do membro etc.) e pequenas ferramentas reaproveitadas pelo resto.
 
 create extension if not exists citext with schema extensions;
 create extension if not exists pg_trgm with schema extensions;
@@ -72,6 +74,7 @@ as $$
   )
 $$;
 
+-- Atualiza automaticamente a data de "última alteração" sempre que um registro muda.
 create function private.set_updated_at()
 returns trigger
 language plpgsql

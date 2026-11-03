@@ -2,6 +2,8 @@
 -- Triggers e funções internas: perfis, updated_at, imutabilidade, auditoria,
 -- histórico de leads, notificações, limites e validações.
 -- =============================================================================
+-- Em resumo: ações automáticas do banco, que acontecem sozinhas quando algo é gravado
+-- (histórico, auditoria, avisos, limites e proteções).
 
 -- -----------------------------------------------------------------------------
 -- Funções internas de escrita (chamadas apenas por RPCs/triggers)
@@ -39,6 +41,7 @@ begin
 end;
 $$;
 
+-- Grava um acontecimento no histórico do lead.
 create function private.add_lead_event(
   p_company_id uuid,
   p_lead_id uuid,
@@ -114,10 +117,12 @@ begin
 end;
 $$;
 
+-- Quando alguém se cadastra, cria automaticamente o perfil da pessoa.
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function private.handle_auth_user_created();
 
+-- Quando a pessoa muda nome ou e-mail no login, atualiza o perfil também.
 create function private.handle_auth_user_updated()
 returns trigger
 language plpgsql
@@ -171,6 +176,7 @@ create trigger set_updated_at before update on public.sales
 -- -----------------------------------------------------------------------------
 create trigger lead_events_immutable before update or delete on public.lead_events
   for each row execute function private.prevent_mutation();
+-- Impede apagar ou alterar o histórico e o registro de auditoria.
 create trigger audit_logs_immutable before update or delete on public.audit_logs
   for each row execute function private.prevent_mutation();
 create trigger lead_events_no_truncate before truncate on public.lead_events
@@ -198,6 +204,7 @@ begin
 end;
 $$;
 
+-- Confere o endereço e o fuso horário da empresa antes de salvar.
 create trigger validate_company before insert or update of slug, timezone on public.companies
   for each row execute function private.validate_company();
 
@@ -243,6 +250,7 @@ begin
 end;
 $$;
 
+-- Impede mudar o tipo de uma etapa do funil depois de criada.
 create trigger protect_stage_kind before update of kind on public.pipeline_stages
   for each row execute function private.protect_stage_kind();
 
@@ -279,6 +287,7 @@ begin
 end;
 $$;
 
+-- Aplica limites de quantidade nas listas de configuração.
 create trigger enforce_limits before insert on public.lead_sources
   for each row execute function private.enforce_config_limits();
 create trigger enforce_limits before insert on public.lost_reasons
@@ -308,6 +317,7 @@ begin
 end;
 $$;
 
+-- Impede mudar o tipo de um campo extra que já tem valores.
 create trigger protect_custom_field_type before update of field_type on public.custom_fields
   for each row execute function private.protect_custom_field_type();
 
@@ -348,6 +358,7 @@ begin
 end;
 $$;
 
+-- Registra na auditoria toda alteração nas configurações.
 create trigger audit_change after insert or update or delete on public.lead_sources
   for each row execute function private.audit_config_change();
 create trigger audit_change after insert or update or delete on public.lost_reasons
@@ -398,9 +409,11 @@ begin
 end;
 $$;
 
+-- Confere os dados da tarefa antes de salvar.
 create trigger before_task_write before insert or update on public.tasks
   for each row execute function private.before_task_write();
 
+-- Depois de salvar uma tarefa, avisa a pessoa responsável que ela recebeu a tarefa.
 create function private.after_task_write()
 returns trigger
 language plpgsql

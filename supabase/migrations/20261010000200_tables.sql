@@ -3,6 +3,8 @@
 -- Regra geral: toda tabela comercial tem company_id e as filhas usam FK composta
 -- (company_id, x_id) para impedir vínculos entre empresas diferentes.
 -- =============================================================================
+-- Em resumo: cria todas as tabelas onde o sistema guarda as informações
+-- (empresas, pessoas, leads, tarefas, vendas, histórico e avisos).
 
 -- -----------------------------------------------------------------------------
 -- Plataforma e identidade
@@ -15,6 +17,7 @@ create table public.profiles (
   updated_at timestamptz not null default now()
 );
 
+-- Pessoas que administram a plataforma inteira.
 create table public.platform_admins (
   user_id uuid primary key references public.profiles (id) on delete restrict,
   granted_at timestamptz not null default now(),
@@ -22,6 +25,7 @@ create table public.platform_admins (
   note text
 );
 
+-- Endereços de empresa que não podem ser usados (ex.: "admin", "app").
 create table public.reserved_slugs (
   slug extensions.citext primary key
 );
@@ -53,6 +57,7 @@ create table public.companies (
   constraint companies_suspension_coherent check ((status = 'suspended') = (suspended_at is not null))
 );
 
+-- Ligação entre pessoas e empresas: papel (administrador ou vendedor) e se o acesso está ativo.
 create table public.company_members (
   id uuid primary key default gen_random_uuid(),
   company_id uuid not null references public.companies (id) on delete restrict,
@@ -72,6 +77,7 @@ create index company_members_user_active_idx on public.company_members (user_id)
 create index company_members_rotation_idx on public.company_members (company_id, distribution_seq)
   where role = 'seller' and status = 'active';
 
+-- Convites enviados para novas pessoas entrarem na empresa.
 create table public.company_invitations (
   id uuid primary key default gen_random_uuid(),
   company_id uuid not null references public.companies (id) on delete restrict,
@@ -92,6 +98,7 @@ create table public.company_invitations (
 create unique index company_invitations_pending_email_key on public.company_invitations (company_id, email)
   where accepted_at is null and revoked_at is null;
 
+-- Guarda de quem é a vez no rodízio de distribuição de leads.
 create table public.lead_distribution_state (
   company_id uuid primary key references public.companies (id) on delete restrict,
   last_member_seq bigint,
@@ -126,6 +133,7 @@ create unique index pipeline_stages_one_default on public.pipeline_stages (compa
 create unique index pipeline_stages_name_key on public.pipeline_stages (company_id, name_key)
   where archived_at is null;
 
+-- Origens dos leads (ex.: Instagram, indicação, site).
 create table public.lead_sources (
   id uuid primary key default gen_random_uuid(),
   company_id uuid not null references public.companies (id) on delete restrict,
@@ -139,6 +147,7 @@ create table public.lead_sources (
   constraint lead_sources_name_key unique (company_id, name_key)
 );
 
+-- Motivos de perda de uma oportunidade (ex.: preço, concorrência).
 create table public.lost_reasons (
   id uuid primary key default gen_random_uuid(),
   company_id uuid not null references public.companies (id) on delete restrict,
@@ -152,6 +161,7 @@ create table public.lost_reasons (
   constraint lost_reasons_name_key unique (company_id, name_key)
 );
 
+-- Campos extras que cada empresa pode criar no cadastro de leads.
 create table public.custom_fields (
   id uuid primary key default gen_random_uuid(),
   company_id uuid not null references public.companies (id) on delete restrict,
@@ -168,6 +178,7 @@ create table public.custom_fields (
   constraint custom_fields_key_key unique (company_id, key)
 );
 
+-- Opções dos campos extras do tipo lista.
 create table public.custom_field_options (
   id uuid primary key default gen_random_uuid(),
   company_id uuid not null,
@@ -253,6 +264,7 @@ create index leads_lost_reason_idx on public.leads (company_id, lost_reason_id);
 create index leads_stage_fk_idx on public.leads (stage_id);
 create index leads_search_trgm_idx on public.leads using gin (search_text extensions.gin_trgm_ops);
 
+-- Valores preenchidos nos campos extras de cada lead.
 create table public.lead_custom_values (
   company_id uuid not null,
   lead_id uuid not null,
@@ -287,6 +299,7 @@ create index lead_custom_values_date_idx on public.lead_custom_values (field_id,
 create index lead_custom_values_text_trgm_idx on public.lead_custom_values
   using gin (value_text extensions.gin_trgm_ops);
 
+-- Anotações e contatos registrados em cada lead.
 create table public.lead_interactions (
   id uuid primary key default gen_random_uuid(),
   company_id uuid not null,
@@ -337,6 +350,7 @@ create index tasks_lead_idx on public.tasks (company_id, lead_id);
 create index tasks_pending_due_idx on public.tasks (due_at) where status = 'pending';
 create index tasks_created_by_idx on public.tasks (created_by);
 
+-- Vendas ligadas aos leads (pendentes, concluídas ou canceladas).
 create table public.sales (
   id uuid primary key default gen_random_uuid(),
   company_id uuid not null references public.companies (id) on delete restrict,
@@ -416,6 +430,7 @@ create index lead_events_to_stage_idx on public.lead_events (to_stage_id);
 create index lead_events_lost_reason_idx on public.lead_events (lost_reason_id);
 create index lead_events_sale_idx on public.lead_events (sale_id);
 
+-- Registro de ações importantes (quem fez o quê e quando), que não pode ser alterado.
 create table public.audit_logs (
   id bigint generated always as identity primary key,
   company_id uuid references public.companies (id) on delete restrict,
@@ -430,6 +445,7 @@ create table public.audit_logs (
 create index audit_logs_company_idx on public.audit_logs (company_id, occurred_at desc);
 create index audit_logs_entity_idx on public.audit_logs (entity_type, entity_id);
 
+-- Avisos internos mostrados no sininho (lead recebido, tarefa atrasada etc.).
 create table public.notifications (
   id uuid primary key default gen_random_uuid(),
   company_id uuid not null references public.companies (id) on delete restrict,

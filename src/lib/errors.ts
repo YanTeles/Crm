@@ -63,11 +63,14 @@ const MESSAGES: Record<string, string> = {
 
 export type DbError = { code?: string; message?: string; details?: string | null } | null | undefined;
 
+// Separa o código do erro enviado pelo banco (por exemplo, "slug_taken").
 export function errorCode(error: DbError): string | null {
   const match = error?.message?.match(/^crm:([a-z_]+)/);
   return match?.[1] ?? null;
 }
 
+// Transforma qualquer erro em uma mensagem clara em português.
+// Se não reconhecer o erro, usa uma mensagem genérica.
 export function translateError(error: DbError, fallback = "Não foi possível concluir a operação."): string {
   if (!error) return fallback;
   const code = errorCode(error);

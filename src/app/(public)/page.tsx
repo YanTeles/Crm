@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/session";
 import { APP_NAME } from "@/lib/brand";
 
+// Vantagens do sistema que aparecem em cartões na página inicial.
 const FEATURES = [
   {
     icon: Users,
@@ -39,10 +40,13 @@ const FEATURES = [
   },
 ];
 
+// Página inicial pública: apresenta o sistema e mostra os botões de entrar e cadastrar
+// (ou de abrir o CRM, se a pessoa já estiver logada).
 export default async function LandingPage() {
   const user = await getCurrentUser();
   return (
     <div className="flex min-h-svh flex-col">
+      {/* Topo: logotipo, botão de tema e botões de acesso. */}
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
         <BrandMark />
         <nav className="flex items-center gap-2">
@@ -64,6 +68,7 @@ export default async function LandingPage() {
         </nav>
       </header>
       <main className="flex-1">
+        {/* Chamada principal com título e botões de cadastro. */}
         <section className="mx-auto max-w-6xl px-4 pt-16 pb-12 text-center sm:px-6 sm:pt-24">
           <h1 className="mx-auto max-w-3xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
             Gestão comercial simples para equipes de vendas
@@ -81,6 +86,7 @@ export default async function LandingPage() {
             </Button>
           </div>
         </section>
+        {/* Cartões com as vantagens do sistema. */}
         <section className="mx-auto grid max-w-6xl gap-4 px-4 pb-24 sm:grid-cols-2 sm:px-6 lg:grid-cols-3">
           {FEATURES.map((f) => (
             <div key={f.title} className="bg-card rounded-xl border p-5">
@@ -91,6 +97,7 @@ export default async function LandingPage() {
           ))}
         </section>
       </main>
+      {/* Rodapé com o ano atual. */}
       <footer className="text-muted-foreground border-t py-6 text-center text-sm">
         © {new Date().getFullYear()} {APP_NAME}
       </footer>

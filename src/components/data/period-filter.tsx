@@ -4,6 +4,7 @@ import { useUrlState } from "@/components/data/url-state";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+// Opções de período que aparecem no seletor.
 export const PERIOD_OPTIONS = [
   { value: "this_month", label: "Este mês" },
   { value: "last_month", label: "Mês passado" },
@@ -13,6 +14,7 @@ export const PERIOD_OPTIONS = [
   { value: "custom", label: "Personalizado" },
 ] as const;
 
+// Seletor de período. Ao escolher "Personalizado", aparecem campos para as datas de início e fim.
 export function PeriodFilter() {
   const { params, set } = useUrlState();
   const period = params.get("periodo") ?? "this_month";

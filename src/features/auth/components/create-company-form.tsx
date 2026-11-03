@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { createCompany } from "../actions";
 import { companyNameSchema } from "../schemas";
 
+// Formulário para digitar o nome da empresa e criá-la.
 export function CreateCompanyForm({ defaultName }: { defaultName: string }) {
   const form = useForm<{ name: string }>({
     resolver: zodResolver(companyNameSchema),

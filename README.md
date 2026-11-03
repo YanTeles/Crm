@@ -1,88 +1,147 @@
-# CRM Comercial (SaaS multiempresa)
+# CRM Comercial
 
-CRM web multiempresa com isolamento rígido de dados: leads, funil Kanban, distribuição por rodízio, tarefas, vendas e relatórios. Especificação funcional em [CRM_SAAS_ESPECIFICACAO.md](CRM_SAAS_ESPECIFICACAO.md).
+## O que é o projeto
 
-**Stack:** Next.js 16 (App Router) · React 19 · TypeScript estrito · Tailwind CSS 4 · shadcn/ui · Supabase (PostgreSQL, Auth, RLS, Realtime) · TanStack Query/Table · dnd-kit · Recharts · React Hook Form + Zod · Vitest · Playwright · pgTAP.
+Nosso projeto é um **CRM** (sistema para gerenciar clientes e vendas) feito para empresas que têm uma equipe de vendedores. Várias empresas podem usar o mesmo sistema, mas cada uma só enxerga os próprios dados.
 
-## Arquitetura em uma página
+Com ele dá para:
 
-- **Banco é a fonte da verdade.** Toda tabela tem RLS. Escrita em entidades centrais (leads, etapas, atribuição, vendas, equipe, empresa) só acontece por funções SQL (`supabase/migrations/*_rpc_*.sql`) que validam autorização, travam linhas e gravam histórico/auditoria na mesma transação.
-- **Isolamento multiempresa:** FKs compostas `(company_id, id)` impedem vínculos entre empresas; políticas exigem membro **ativo** de empresa **ativa** (lidos do banco, nunca de claims do JWT).
-- **Next.js:** Server Components para leitura e Server Actions para mutações, sempre com a sessão do usuário (`@supabase/ssr`). Nenhuma chave `service_role`/secret é usada pela aplicação.
-- **URLs:** `/app/[slug]/...`. O slug só identifica a empresa; a autorização vem do vínculo do usuário.
+- cadastrar **leads** (possíveis clientes);
+- distribuir os leads entre os vendedores automaticamente (**rodízio**);
+- acompanhar cada lead em um **funil de vendas** (quadro com colunas que dá para arrastar);
+- criar **tarefas** com prazo (ex.: "ligar para o cliente amanhã");
+- registrar **vendas**;
+- ver **relatórios** com faturamento, conversão e ranking de vendedores.
+
+Existem dois tipos de usuário na empresa:
+
+- **Administrador** = vê tudo da empresa, gerencia a equipe e as configurações;
+- **Vendedor** = vê e trabalha só com os leads que foram entregues a ele.
+
+Também existe o **administrador da plataforma**, que cuida de todas as empresas (pode suspender ou reativar uma empresa), mas não vê os dados comerciais delas.
+
+## Tecnologias que usamos
+
+- **Next.js + React** = montam as telas do sistema e fazem a ligação com o servidor
+- **TypeScript** = JavaScript com tipos, ajuda a evitar erros no código
+- **Tailwind CSS + shadcn/ui** = deixam o visual bonito (cores, botões, tabelas, janelas)
+- **Supabase** = banco de dados (PostgreSQL), login dos usuários e avisos em tempo real
+- **Zod + React Hook Form** = conferem se os formulários foram preenchidos certo
+- **dnd-kit** = permite arrastar os cartões no funil
+- **Recharts** = desenha os gráficos dos relatórios
+- **Vitest, Playwright e pgTAP** = testes automáticos do sistema e do banco
+
+## Como o código está organizado
+
+### Pastas principais
 
 ```
-src/
-  app/            rotas (públicas, auth, /app/[slug]/..., /plataforma, /perfil)
-  components/     ui (shadcn), layout, forms, data (tabelas, filtros, cards)
-  features/       módulos: auth, leads, pipeline, tasks, sales, reports, team, settings, notifications, platform
-  lib/            supabase, auth (DAL), datas/fuso, telefone, formatação, erros
-  types/          database.ts (gerado)
-supabase/
-  migrations/     schema, RLS, funções, triggers, agendamento
-  tests/database/ testes pgTAP (isolamento, permissões, regras de negócio)
-tests/            unit (Vitest), integration (Postgres real), e2e (Playwright)
-scripts/db/       runner de testes e gerador de tipos sem Docker (PGlite)
+src/        = código do site (telas e lógica)
+supabase/   = banco de dados (tabelas, regras e permissões)
+tests/      = testes automáticos
+scripts/    = ferramentas para rodar os testes do banco e gerar os tipos
 ```
 
-## Pré-requisitos
+### Dentro de `src/`
 
-- Node.js 22+ (testado com 24 LTS)
-- Para o ambiente local completo: **Docker Desktop** (com WSL2 no Windows) — o Supabase CLI já vem como dependência (`npx supabase`).
+- `src/app` = as **páginas** do sistema. Cada pasta aqui vira um endereço do site
+  - `(public)` = página inicial, que apresenta o sistema
+  - `(auth)` = telas de acesso: `entrar` (login), `cadastro`, `esqueci-senha`, `redefinir-senha`, `onboarding` (criar a empresa depois do cadastro) e `convite` (aceitar convite para entrar em uma empresa)
+  - `app` = escolha da empresa (quando a pessoa participa de mais de uma)
+  - `app/[slug]` = área interna da empresa. O `[slug]` é o nome da empresa no endereço (ex.: `/app/minha-loja`)
+    - `layout.tsx` = estrutura fixa: menu lateral e barra do topo. Ao trocar de seção, só o conteúdo muda e a página não recarrega
+    - `dashboard` = painel com o resumo do mês
+    - `leads` = lista de leads e a página de detalhes de cada um
+    - `funil` = quadro do funil de vendas (arrastar e soltar)
+    - `tarefas` = tarefas de hoje, atrasadas, próximas e concluídas
+    - `vendas` = lista de vendas e totais
+    - `relatorios` = gráficos e números do período
+    - `equipe` = membros e convites (só administradores)
+    - `configuracoes` = dados da empresa, etapas do funil, campos extras, origens e motivos de perda (só administradores)
+  - `perfil` = trocar nome e senha
+  - `plataforma` = painel do administrador da plataforma
+  - `auth/confirm` = recebe os links enviados por e-mail (confirmação de cadastro e troca de senha)
 
-## Configuração local
+- `src/features` = a **lógica de cada parte** do sistema. Cada pasta tem as telas daquela parte e as operações que salvam ou buscam dados
+  - `auth` = login, cadastro, recuperação de senha e convites
+  - `leads` = cadastrar, editar, mover, ganhar, perder, arquivar e anotar nos leads
+  - `pipeline` = o quadro do funil
+  - `tasks` = tarefas
+  - `sales` = vendas
+  - `reports` = relatórios e gráficos
+  - `team` = equipe e convites
+  - `settings` = configurações da empresa
+  - `notifications` = sininho de avisos
+  - `platform` = suspender/reativar empresas
+  - `profile` = perfil do usuário
+  - `workspace` = listas usadas em várias telas (etapas, membros, origens...)
 
-```bash
-npm install
-npm run db:start            # sobe Supabase local (Docker); exibe URL e chaves
-cp .env.example .env.local  # preencha com a URL e a chave publishable exibidas
-npm run db:reset            # aplica migrações + seed
-npm run dev                 # http://localhost:3000
-```
+  Dentro delas aparecem sempre os mesmos tipos de arquivo:
+  - `actions.ts` = operações que **salvam** dados (rodam no servidor)
+  - `queries.ts` = operações que **buscam** dados
+  - `schemas.ts` = regras dos formulários (o que é obrigatório, tamanho máximo, formato)
+  - `components/` = pedaços de tela daquela parte (formulários, tabelas, janelas)
 
-E-mails locais (confirmação, recuperação) ficam no Mailpit: http://127.0.0.1:54324.
+- `src/components` = **pedaços de tela reaproveitados** em vários lugares
+  - `ui` = peças básicas prontas (botão, campo de texto, janela, tabela...)
+  - `layout` = menu lateral, cabeçalho, logotipo, botão de tema claro/escuro, menu do usuário
+  - `forms` = campo de formulário padrão, campo de dinheiro e botão de enviar
+  - `data` = tabela, paginação, filtro de período, cartões de números e etiquetas coloridas
 
-Superadministrador: não existe cadastro público. Promova um usuário via SQL (veja `supabase/seed.sql`).
+- `src/lib` = **funções de apoio** usadas pelo sistema todo
+  - `supabase` = conexão com o banco de dados
+  - `auth/session.ts` = descobre quem está logado, de qual empresa é e o que pode fazer
+  - `dates.ts` = cálculos de data respeitando o fuso horário da empresa
+  - `format.ts` = mostra valores no formato brasileiro (R$ 1.234,56, 03/11/2026)
+  - `phone.ts` = valida e formata telefones e cria o link do WhatsApp
+  - `errors.ts` = transforma erros do banco em mensagens claras em português
 
-## Variáveis de ambiente
+- `src/types/database.ts` = descrição das tabelas do banco para o TypeScript (gerado automaticamente)
+- `src/proxy.ts` = roda antes de cada página: mantém o login ativo e manda para o login quem tenta entrar sem estar logado
 
-| Variável                               | Uso                                                                                  |
-| -------------------------------------- | ------------------------------------------------------------------------------------ |
-| `NEXT_PUBLIC_SUPABASE_URL`             | URL do projeto Supabase                                                              |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Chave pública (publishable/anon). Segura no navegador: a RLS protege os dados        |
-| `NEXT_PUBLIC_SITE_URL`                 | URL pública da aplicação (links de e-mail e convites)                                |
-| `NEXT_PUBLIC_TURNSTILE_SITE_KEY`       | Opcional. CAPTCHA no cadastro/recuperação; a chave secreta vai no painel do Supabase |
+### Dentro de `supabase/`
 
-Nunca versione `.env.local`. A aplicação não precisa de `service_role`.
+- `migrations` = scripts que **criam o banco de dados**, executados em ordem:
+  - `base` = tipos de valores e ferramentas básicas
+  - `tables` = todas as tabelas (empresas, membros, leads, tarefas, vendas, histórico, avisos...)
+  - `authorization` = **regras de permissão**: cada empresa só vê os próprios dados e o vendedor só vê os leads dele
+  - `triggers` = ações automáticas (gravar histórico, avisar o responsável, impedir apagar o histórico)
+  - `rpc_company_team` = operações de empresa, equipe e convites
+  - `rpc_leads` = operações de leads, rodízio e funil
+  - `rpc_sales_reports` = operações de vendas e cálculos dos relatórios
+- `tests/database` = testes que conferem as regras do banco (permissões, isolamento entre empresas, rodízio, vendas)
+- `templates` = modelos dos e-mails de confirmação e de troca de senha
 
-## Comandos
+### Dentro de `tests/`
 
-| Comando                              | O que faz                                                                              |
-| ------------------------------------ | -------------------------------------------------------------------------------------- |
-| `npm run dev` / `build` / `start`    | Desenvolvimento, build e produção                                                      |
-| `npm run typecheck` · `npm run lint` | TypeScript estrito e ESLint                                                            |
-| `npm test`                           | Vitest (unidade; integração roda se `SUPABASE_DB_URL` estiver definido)                |
-| `npm run test:db`                    | Migrações + **todos os testes pgTAP** em Postgres embarcado (PGlite), sem Docker       |
-| `npm run test:db:supabase`           | Mesmos testes pgTAP no Supabase local (`supabase test db`)                             |
-| `npm run test:e2e`                   | Playwright: testes de fumaça; fluxo crítico completo com `E2E_FULL=1` e Supabase local |
-| `npm run db:types`                   | Regenera `src/types/database.ts` a partir das migrações (sem Docker)                   |
-| `npm run check`                      | typecheck + lint + unit + pgTAP                                                        |
+- `unit` = testes das funções de apoio (telefone, dinheiro, datas, mensagens de erro)
+- `integration` = teste do rodízio com vários cadastros ao mesmo tempo
+- `e2e` = testes que abrem o sistema no navegador e simulam uma pessoa usando
 
-Teste de concorrência do rodízio (Postgres real):
-`SUPABASE_DB_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres npm test`
+## Como as partes conversam
 
-## Deploy (Vercel + Supabase gerenciado)
+1. A pessoa abre uma página (ex.: Leads).
+2. O `proxy.ts` confere se ela está logada.
+3. A página, em `src/app`, usa as funções de `src/features/.../queries.ts` para buscar os dados no banco.
+4. Quando a pessoa salva algo (ex.: cadastra um lead), o formulário chama uma função de `actions.ts`.
+5. Essa função confere os dados com as regras de `schemas.ts` e manda para o banco.
+6. O banco confere de novo as permissões, salva e registra no histórico.
+7. A tela é atualizada com os dados novos.
 
-1. Crie o projeto Supabase e rode `npx supabase link` + `npx supabase db push` (aplica as migrações versionadas).
-2. No painel do Supabase: habilite confirmação de e-mail, configure **SMTP próprio** (o padrão tem limite muito baixo), Site URL e Redirect URLs com o domínio de produção, templates de e-mail iguais aos de `supabase/templates/` (fluxo `token_hash`), e opcionalmente o CAPTCHA (Turnstile).
-3. Confirme que a extensão `pg_cron` está habilitada (notificações de tarefas vencidas a cada 5 min).
-4. Na Vercel, defina as variáveis de ambiente acima e faça o deploy.
-5. Antes de produção: backups/restauração testados, política de retenção e processo LGPD.
+## Segurança
 
-## Regras de negócio relevantes
+- **A segurança fica no banco de dados.** Mesmo que alguém tente burlar a tela, o banco confere se a pessoa é membro ativo da empresa e se tem permissão.
+- Cada registro guarda de qual empresa ele é, então um dado de uma empresa nunca se mistura com o de outra.
+- O histórico dos leads e o registro de auditoria **não podem ser alterados nem apagados**.
+- Se duas pessoas editam o mesmo lead ao mesmo tempo, o sistema avisa em vez de sobrescrever.
+- Os formulários são conferidos duas vezes: na tela (para avisar rápido) e no servidor (para garantir).
 
-- Ganho exige valor (R$ 0,00 permitido) e **não** cria venda; faturamento soma apenas vendas `completed`, pela data de conclusão.
-- Conversão = leads criados no período que estão ganhos (lead reaberto e não ganho de novo não conta).
-- Vendedor vê e altera apenas leads atribuídos a ele; edita/cancela só as próprias vendas pendentes.
-- Rodízio: só vendedores ativos, ordem de entrada na empresa, transacional por empresa; atribuição manual não altera a posição.
-- Histórico (`lead_events`) e auditoria (`audit_logs`) são imutáveis.
+## Regras de negócio
+
+- **Rodízio:** os leads novos são entregues aos vendedores ativos, um de cada vez, em ordem.
+- **Ganho:** marcar um lead como ganho exige informar um valor (pode ser R$ 0,00).
+- **Perda:** marcar como perdido exige escolher um motivo.
+- **Faturamento:** soma só as vendas **concluídas**, pela data de conclusão. O valor do ganho não entra no faturamento.
+- **Conversão:** leads criados no período que estão ganhos.
+- **Vendedor:** vê e altera só os leads dele e só pode editar ou cancelar as próprias vendas pendentes.
+- **Tarefas atrasadas:** geram um aviso automático no sininho do responsável.

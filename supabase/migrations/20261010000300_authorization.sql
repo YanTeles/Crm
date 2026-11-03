@@ -3,6 +3,8 @@
 -- Premissa: todo acesso comercial exige membro ATIVO de empresa ATIVA.
 -- Papel e status são sempre lidos do banco, nunca de claims do JWT.
 -- =============================================================================
+-- Em resumo: regras de permissão. Garantem que cada empresa só veja os próprios dados
+-- e que o vendedor só veja os leads dele, direto no banco de dados.
 
 -- -----------------------------------------------------------------------------
 -- Funções auxiliares (SECURITY DEFINER para evitar recursão de RLS)
@@ -118,6 +120,7 @@ begin
 end;
 $$;
 
+-- Exige que a pessoa seja administradora da empresa; se não for, a operação é recusada.
 create function private.require_admin(p_company_id uuid)
 returns void
 language plpgsql

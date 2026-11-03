@@ -1,3 +1,4 @@
+// Conexão com o banco de dados usada pelas partes da tela que rodam no navegador.
 import { createBrowserClient } from "@supabase/ssr";
 import { env } from "@/lib/env";
 import type { Database } from "@/types/database";

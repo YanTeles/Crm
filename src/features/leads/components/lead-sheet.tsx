@@ -19,6 +19,7 @@ import { LeadForm } from "./lead-form";
 
 type EditableLead = React.ComponentProps<typeof LeadForm>["lead"];
 
+// Painel lateral que se abre com o formulário de novo lead ou de edição do lead.
 export function LeadSheet({
   lookups,
   lead,

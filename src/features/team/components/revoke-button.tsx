@@ -6,6 +6,7 @@ import { useWorkspace } from "@/components/layout/workspace-context";
 import { Button } from "@/components/ui/button";
 import { revokeInvitation } from "../actions";
 
+// Botão para cancelar um convite pendente.
 export function RevokeInvitationButton({ invitationId }: { invitationId: string }) {
   const ws = useWorkspace();
   const { pending, run } = useAction();

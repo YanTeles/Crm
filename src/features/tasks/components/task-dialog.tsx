@@ -33,11 +33,13 @@ export type EditableTask = {
   lead: PickedLead | null;
 };
 
+// Prazo sugerido para uma nova tarefa.
 function defaultDue(tz: string) {
   const d = new Date(Date.now() + 24 * 3600 * 1000);
   return isoToLocalInput(d.toISOString(), tz).slice(0, 11) + "09:00";
 }
 
+// Janela de nova tarefa ou de edição: título, descrição, prazo, responsável e lead ligado.
 export function TaskDialog({
   members,
   fixedLead,
@@ -61,6 +63,7 @@ export function TaskDialog({
 
   const assignable = members.filter((m) => m.status === "active");
 
+  // Limpa o formulário ao abrir a janela.
   function reset() {
     setTitle(task?.title ?? "");
     setDescription(task?.description ?? "");
@@ -70,6 +73,7 @@ export function TaskDialog({
     setErrors({});
   }
 
+  // Confere os dados e salva a tarefa (nova ou editada).
   function submit(e: React.FormEvent) {
     e.preventDefault();
     const dueAt = localInputToIso(due, ws.timezone);

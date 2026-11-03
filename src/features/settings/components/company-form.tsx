@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { updateCompany } from "../actions";
 
+// Fusos horários que podem ser escolhidos.
 const TIMEZONES = [
   ["America/Sao_Paulo", "Brasília (SP, RJ, MG, Sul, GO, DF…)"],
   ["America/Bahia", "Bahia"],
@@ -31,6 +32,7 @@ const TIMEZONES = [
   ["UTC", "UTC"],
 ] as const;
 
+// Formulário com os dados da empresa: nome, endereço, fuso horário e distribuição automática de leads.
 export function CompanyForm() {
   const ws = useWorkspace();
   const [pending, startTransition] = useTransition();

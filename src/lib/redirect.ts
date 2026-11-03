@@ -1,3 +1,5 @@
+// Garante que, depois do login, a pessoa só seja levada para páginas do próprio sistema,
+// nunca para sites de fora (proteção contra golpes).
 // Evita open redirect: aceita apenas caminhos internos (ou URL do próprio site).
 export function safeNextPath(
   value: string | null | undefined,

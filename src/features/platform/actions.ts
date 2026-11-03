@@ -5,6 +5,7 @@ import { z } from "zod";
 import { dbFail, fail, ok, type ActionResult } from "@/lib/action";
 import { createClient } from "@/lib/supabase/server";
 
+// Suspende ou reativa uma empresa (só administradores da plataforma). Para suspender, é preciso um motivo.
 export async function setCompanyStatus(input: {
   companyId: string;
   status: "active" | "suspended";

@@ -10,9 +10,11 @@ import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Empresas" };
 
+// Tela de escolha de empresa (uma pessoa pode participar de mais de uma).
 export default async function CompanyChooserPage() {
   const user = await requireUser("/app");
   const supabase = await createClient();
+  // Busca as empresas em que a pessoa está ativa.
   const { data: memberships } = await supabase
     .from("company_members")
     .select("role, status, companies(name, slug, status, created_by)")
@@ -26,11 +28,13 @@ export default async function CompanyChooserPage() {
   const platformAdmin = await isPlatformAdmin();
   const ownsCompany = companies.some((c) => c.created_by === user.id);
 
+  // Se tem só uma empresa, vai direto para ela; se não tem nenhuma, vai para o cadastro de empresa.
   if (companies.length === 1 && !platformAdmin) redirect(`/app/${companies[0].slug}/dashboard`);
   if (companies.length === 0 && !platformAdmin) redirect("/onboarding");
 
   return (
     <AuthShell title="Escolha a empresa" description={`Conectado como ${user.email}`}>
+      {/* Lista das empresas, com o papel da pessoa em cada uma. */}
       <ul className="flex flex-col gap-2">
         {companies.map((c) => (
           <li key={c.slug}>
@@ -50,6 +54,7 @@ export default async function CompanyChooserPage() {
             </Link>
           </li>
         ))}
+        {/* Atalho para a administração da plataforma, só para quem cuida do sistema todo. */}
         {platformAdmin ? (
           <li>
             <Link href="/plataforma" className="hover:bg-muted flex items-center gap-3 rounded-lg border p-3">
@@ -60,6 +65,7 @@ export default async function CompanyChooserPage() {
           </li>
         ) : null}
       </ul>
+      {/* Botão para criar a própria empresa, se a pessoa ainda não criou uma. */}
       {!ownsCompany ? (
         <Button asChild variant="outline" className="mt-4 w-full">
           <Link href="/onboarding">

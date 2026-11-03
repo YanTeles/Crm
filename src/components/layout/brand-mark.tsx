@@ -2,6 +2,7 @@ import { ChartNoAxesColumnIncreasing } from "lucide-react";
 import { APP_NAME } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
+// Logotipo do sistema (ícone e nome).
 export function BrandMark({ className, compact }: { className?: string; compact?: boolean }) {
   return (
     <span className={cn("inline-flex items-center gap-2 font-semibold", className)}>

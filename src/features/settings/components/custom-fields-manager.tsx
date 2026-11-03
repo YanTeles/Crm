@@ -22,8 +22,10 @@ import {
   updateFieldOption,
 } from "../actions";
 
+// Nomes em português dos tipos de campo.
 const TYPE_LABEL = { text: "Texto", number: "Número", date: "Data", select: "Lista de opções" } as const;
 
+// Tela para criar, editar, ativar/desativar e excluir campos extras do cadastro de leads.
 export function CustomFieldsManager({ fields }: { fields: CustomFieldDef[] }) {
   const ws = useWorkspace();
   const { pending, run } = useAction();

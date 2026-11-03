@@ -5,12 +5,14 @@ import { z } from "zod";
 import { dbFail, fail, invalid, ok, type ActionResult } from "@/lib/action";
 import { createClient } from "@/lib/supabase/server";
 
+// Regras do valor da venda: maior que zero e com até duas casas decimais.
 const money = z
   .number({ error: "Informe o valor." })
   .gt(0, "O valor precisa ser maior que zero.")
   .max(999999999999.99)
   .refine((v) => Math.abs(Math.round(v * 100) - v * 100) < 1e-6, "Use no máximo duas casas decimais.");
 
+// Regras do formulário de nova venda.
 const saleSchema = z.object({
   leadId: z.string().uuid("Selecione o lead."),
   description: z.string().trim().min(1, "Informe a descrição.").max(500),
@@ -22,6 +24,7 @@ const saleSchema = z.object({
 });
 export type SaleInput = z.input<typeof saleSchema>;
 
+// Regras do formulário de edição de venda.
 const editSchema = z.object({
   saleId: z.string().uuid(),
   description: z.string().trim().min(1, "Informe a descrição.").max(500),
@@ -32,10 +35,12 @@ const editSchema = z.object({
 });
 export type SaleEditInput = z.input<typeof editSchema>;
 
+// Atualiza as telas da empresa depois de uma alteração.
 function refresh(slug: string) {
   if (/^[a-z0-9-]{3,48}$/.test(slug)) revalidatePath(`/app/${slug}`, "layout");
 }
 
+// Registra uma nova venda ligada a um lead.
 export async function createSale(input: SaleInput & { slug: string }): Promise<ActionResult<string>> {
   const parsed = saleSchema.safeParse(input);
   if (!parsed.success) return invalid(parsed.error);
@@ -55,6 +60,7 @@ export async function createSale(input: SaleInput & { slug: string }): Promise<A
   return ok(data, "Venda registrada.");
 }
 
+// Salva as alterações de uma venda.
 export async function updateSale(input: SaleEditInput & { slug: string }): Promise<ActionResult<number>> {
   const parsed = editSchema.safeParse(input);
   if (!parsed.success) return invalid(parsed.error);
@@ -73,6 +79,7 @@ export async function updateSale(input: SaleEditInput & { slug: string }): Promi
   return ok(data, "Venda atualizada.");
 }
 
+// Marca uma venda pendente como concluída (ela passa a contar no faturamento).
 export async function completeSale(input: {
   saleId: string;
   completedAt?: string | null;
@@ -91,6 +98,7 @@ export async function completeSale(input: {
   return ok(data, "Venda concluída.");
 }
 
+// Cancela uma venda, exigindo um motivo.
 export async function cancelSale(input: {
   saleId: string;
   reason: string;

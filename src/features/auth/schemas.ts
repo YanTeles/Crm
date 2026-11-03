@@ -1,7 +1,10 @@
+// Regras de preenchimento dos formulários de acesso (o que é obrigatório, tamanhos e formatos).
 import { z } from "zod";
 
+// E-mail válido.
 export const emailSchema = z.string().trim().toLowerCase().email("Informe um e-mail válido.").max(254);
 
+// Senha com 8 a 72 caracteres, contendo letras e números.
 export const passwordSchema = z
   .string()
   .min(8, "A senha precisa ter pelo menos 8 caracteres.")
@@ -11,12 +14,14 @@ export const passwordSchema = z
 
 export const fullNameSchema = z.string().trim().min(2, "Informe seu nome.").max(120);
 
+// Formulário de login.
 export const signInSchema = z.object({
   email: emailSchema,
   password: z.string().min(1, "Informe a senha."),
   next: z.string().optional(),
 });
 
+// Formulário de cadastro de quem recebeu um convite.
 export const signUpSchema = z.object({
   fullName: fullNameSchema,
   email: emailSchema,
@@ -29,19 +34,23 @@ export const signUpSchema = z.object({
   captchaToken: z.string().optional(),
 });
 
+// Cadastro de quem vai criar empresa: o nome da empresa passa a ser obrigatório.
 export const signUpCompanySchema = signUpSchema.extend({
   companyName: z.string().trim().min(2, "Informe o nome da empresa.").max(120),
 });
 
+// Formulário de "esqueci minha senha".
 export const forgotPasswordSchema = z.object({
   email: emailSchema,
   captchaToken: z.string().optional(),
 });
 
+// Nova senha: as duas senhas digitadas precisam ser iguais.
 export const resetPasswordSchema = z
   .object({ password: passwordSchema, confirm: z.string() })
   .refine((v) => v.password === v.confirm, { message: "As senhas não conferem.", path: ["confirm"] });
 
+// Nome da empresa.
 export const companyNameSchema = z.object({
   name: z.string().trim().min(2, "Informe o nome da empresa.").max(120),
 });

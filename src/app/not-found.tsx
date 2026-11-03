@@ -10,6 +10,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 
+// Página mostrada quando o endereço não existe ou a pessoa não tem acesso a ele.
 export default function NotFound() {
   return (
     <main className="flex min-h-svh items-center justify-center p-6">

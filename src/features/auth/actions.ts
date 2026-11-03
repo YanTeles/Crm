@@ -1,3 +1,5 @@
+// Operações de acesso que rodam no servidor: entrar, cadastrar, recuperar senha, sair,
+// criar empresa e aceitar convite.
 "use server";
 
 import { redirect } from "next/navigation";
@@ -18,6 +20,7 @@ import {
   type SignUpInput,
 } from "./schemas";
 
+// Entrar no sistema com e-mail e senha. Mostra mensagens claras se algo der errado.
 export async function signIn(input: SignInInput): Promise<ActionResult<never>> {
   const parsed = signInSchema.safeParse(input);
   if (!parsed.success) return invalid(parsed.error);
@@ -37,6 +40,7 @@ export async function signIn(input: SignInInput): Promise<ActionResult<never>> {
   redirect(safeNextPath(parsed.data.next));
 }
 
+// Cadastrar uma nova conta. Um e-mail de confirmação é enviado para a pessoa.
 export async function signUp(input: SignUpInput): Promise<ActionResult<{ email: string }>> {
   const schema = input.invitationToken ? signUpSchema : signUpCompanySchema;
   const parsed = schema.safeParse(input);
@@ -69,6 +73,7 @@ export async function signUp(input: SignUpInput): Promise<ActionResult<{ email: 
   return ok({ email: data.email });
 }
 
+// Reenviar o e-mail de confirmação do cadastro.
 export async function resendConfirmation(email: string): Promise<ActionResult<undefined>> {
   const parsed = forgotPasswordSchema.safeParse({ email });
   if (!parsed.success) return invalid(parsed.error);
@@ -77,6 +82,7 @@ export async function resendConfirmation(email: string): Promise<ActionResult<un
   return ok(undefined, "Se houver um cadastro pendente, enviaremos um novo link.");
 }
 
+// Enviar o e-mail com o link para trocar a senha.
 export async function requestPasswordReset(input: ForgotPasswordInput): Promise<ActionResult<undefined>> {
   const parsed = forgotPasswordSchema.safeParse(input);
   if (!parsed.success) return invalid(parsed.error);
@@ -89,6 +95,7 @@ export async function requestPasswordReset(input: ForgotPasswordInput): Promise<
   return ok(undefined, "Se o e-mail estiver cadastrado, você receberá um link para redefinir a senha.");
 }
 
+// Salvar a nova senha da pessoa.
 export async function updatePassword(input: ResetPasswordInput): Promise<ActionResult<undefined>> {
   const parsed = resetPasswordSchema.safeParse(input);
   if (!parsed.success) return invalid(parsed.error);
@@ -108,12 +115,14 @@ export async function updatePassword(input: ResetPasswordInput): Promise<ActionR
   return ok(undefined, "Senha alterada com sucesso.");
 }
 
+// Sair do sistema e voltar para a tela de login.
 export async function signOut(): Promise<void> {
   const supabase = await createClient();
   await supabase.auth.signOut();
   redirect("/entrar");
 }
 
+// Criar a empresa da pessoa e levá-la para o painel.
 export async function createCompany(input: { name: string }): Promise<ActionResult<never>> {
   const parsed = companyNameSchema.safeParse(input);
   if (!parsed.success) return invalid(parsed.error);
@@ -123,6 +132,7 @@ export async function createCompany(input: { name: string }): Promise<ActionResu
   redirect(`/app/${data[0].slug}/dashboard`);
 }
 
+// Aceitar um convite e entrar na empresa.
 export async function acceptInvitation(token: string): Promise<ActionResult<never>> {
   if (!/^[a-f0-9]{64}$/.test(token)) return fail("Convite inválido.");
   const supabase = await createClient();

@@ -24,23 +24,29 @@ import { formatPhone } from "@/lib/phone";
 
 export const metadata: Metadata = { title: "Lead" };
 
+// Página de detalhes de um lead.
 export default async function LeadDetailPage({ params }: PageProps<"/app/[slug]/leads/[id]">) {
   const { slug, id } = await params;
   const ws = await requireWorkspace(slug);
+  // Confere se o lead existe e pertence a esta empresa.
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
 
   const lead = await getLead(id);
   if (!lead || lead.company_id !== ws.company.id) notFound();
 
+  // Busca as listas da empresa e todo o histórico do lead.
   const [lookups, detail] = await Promise.all([getLookups(ws.company.id), getLeadDetail(id)]);
   const cl = clientLookups(lookups);
   const tz = ws.company.timezone;
+  // Atalhos para trocar códigos por nomes (etapa, pessoa, motivo de perda).
   const names = {
     stage: (sid: string | null) => lookups.stages.find((s) => s.id === sid)?.name ?? "—",
     member: (uid: string | null) => lookups.memberName(uid) ?? "—",
     reason: (rid: string | null) => lookups.reasons.find((r) => r.id === rid)?.name ?? "—",
   };
 
+  // Junta os acontecimentos automáticos e as anotações em uma linha do tempo,
+  // do mais recente para o mais antigo.
   const timeline = [
     ...detail.events.map((e) => ({
       key: `e${e.id}`,
@@ -59,6 +65,7 @@ export default async function LeadDetailPage({ params }: PageProps<"/app/[slug]/
     })),
   ].sort((a, b) => (a.at < b.at ? 1 : -1));
 
+  // Calcula valores usados na tela, como o total já vendido para este lead.
   const customValues = initialCustomValues(detail.customValues);
   const completedRevenue = detail.sales
     .filter((s) => s.status === "completed")
@@ -68,6 +75,7 @@ export default async function LeadDetailPage({ params }: PageProps<"/app/[slug]/
 
   return (
     <div className="space-y-6">
+      {/* Topo: nome, situação, etapa, responsável e botões de ação. */}
       <div>
         <Button variant="ghost" size="sm" asChild className="mb-2 -ml-2">
           <Link href={`/app/${slug}/leads`}>
@@ -108,6 +116,7 @@ export default async function LeadDetailPage({ params }: PageProps<"/app/[slug]/
         </div>
       </div>
 
+      {/* Resumo de quando e por que o lead foi ganho ou perdido. */}
       {lead.outcome !== "open" ? (
         <div className="bg-muted/40 rounded-xl border p-4 text-sm">
           {lead.outcome === "won" ? (
@@ -125,6 +134,7 @@ export default async function LeadDetailPage({ params }: PageProps<"/app/[slug]/
         </div>
       ) : null}
 
+      {/* Abas de histórico, tarefas e vendas, com os dados de contato ao lado. */}
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <Tabs defaultValue="historico">
           <TabsList>
@@ -135,6 +145,7 @@ export default async function LeadDetailPage({ params }: PageProps<"/app/[slug]/
             <TabsTrigger value="vendas">Vendas ({detail.sales.length})</TabsTrigger>
           </TabsList>
 
+          {/* Aba Histórico: formulário para anotar e a linha do tempo. */}
           <TabsContent value="historico" className="space-y-4">
             {!lead.archived_at ? <InteractionForm leadId={lead.id} /> : null}
             <ol className="relative space-y-4 border-l pl-6">
@@ -167,6 +178,7 @@ export default async function LeadDetailPage({ params }: PageProps<"/app/[slug]/
             </ol>
           </TabsContent>
 
+          {/* Aba Tarefas. */}
           <TabsContent value="tarefas" className="space-y-3">
             {!lead.archived_at ? (
               <div className="flex justify-end">
@@ -182,6 +194,7 @@ export default async function LeadDetailPage({ params }: PageProps<"/app/[slug]/
             />
           </TabsContent>
 
+          {/* Aba Vendas. */}
           <TabsContent value="vendas" className="space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-muted-foreground text-sm">
@@ -233,6 +246,7 @@ export default async function LeadDetailPage({ params }: PageProps<"/app/[slug]/
           </TabsContent>
         </Tabs>
 
+        {/* Lateral: dados de contato e campos extras. */}
         <aside className="space-y-4">
           <Card>
             <CardHeader>

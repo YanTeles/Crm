@@ -3,6 +3,8 @@
 -- Transições comerciais travam o lead (FOR UPDATE), conferem row_version e
 -- registram o histórico na mesma transação.
 -- =============================================================================
+-- Em resumo: operações com leads e com o funil (cadastrar, rodízio de vendedores,
+-- editar, trocar responsável, mover de etapa, ganhar, perder, reabrir, arquivar e gerenciar etapas).
 
 -- -----------------------------------------------------------------------------
 -- Auxiliares internos
@@ -54,6 +56,7 @@ as $$
 $$;
 
 -- Rodízio: escolhe o próximo vendedor ativo, de forma atômica por empresa.
+-- Escolhe o próximo vendedor do rodízio, de forma justa e sem repetir.
 create function private.next_rotation_seller(p_company_id uuid)
 returns uuid
 language plpgsql
@@ -267,6 +270,7 @@ $$;
 -- Cadastro de lead (com rodízio atômico quando aplicável)
 -- p_assignment_mode: 'auto' | 'manual' | 'none' (ignorado para vendedor)
 -- -----------------------------------------------------------------------------
+-- Cadastra um lead e, se pedido, entrega a um vendedor pelo rodízio.
 create function public.create_lead(
   p_company_id uuid,
   p_data jsonb,
@@ -626,6 +630,7 @@ begin
 end;
 $$;
 
+-- Marca a oportunidade como ganha, guardando o valor e registrando no histórico.
 create function public.mark_lead_won(p_lead_id uuid, p_amount numeric, p_expected_version integer default null)
 returns integer
 language plpgsql
@@ -661,6 +666,7 @@ begin
 end;
 $$;
 
+-- Marca a oportunidade como perdida, com motivo obrigatório, e registra no histórico.
 create function public.mark_lead_lost(
   p_lead_id uuid,
   p_reason_id uuid,
@@ -707,6 +713,7 @@ begin
 end;
 $$;
 
+-- Reabre uma oportunidade encerrada, voltando para uma etapa em aberto.
 create function public.reopen_lead(p_lead_id uuid, p_to_stage_id uuid default null, p_expected_version integer default null)
 returns integer
 language plpgsql
@@ -751,6 +758,7 @@ begin
 end;
 $$;
 
+-- Arquiva ou restaura um lead.
 create function public.set_lead_archived(p_lead_id uuid, p_archived boolean, p_expected_version integer default null)
 returns integer
 language plpgsql
@@ -815,6 +823,7 @@ begin
 end;
 $$;
 
+-- Renomeia uma etapa do funil.
 create function public.rename_stage(p_stage_id uuid, p_name text)
 returns void
 language plpgsql
@@ -875,6 +884,7 @@ begin
 end;
 $$;
 
+-- Define qual etapa recebe os leads novos.
 create function public.set_default_stage(p_stage_id uuid)
 returns void
 language plpgsql

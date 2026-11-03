@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { signIn } from "../actions";
 import { signInSchema, type SignInInput } from "../schemas";
 
+// Formulário de login: e-mail, senha e link para recuperar a senha.
 export function SignInForm({ next }: { next?: string }) {
   const form = useForm<SignInInput>({
     resolver: zodResolver(signInSchema),

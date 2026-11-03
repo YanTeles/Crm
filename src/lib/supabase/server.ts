@@ -1,3 +1,4 @@
+// Conexão com o banco de dados usada pelo servidor, sempre em nome da pessoa que está logada.
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";

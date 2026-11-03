@@ -26,9 +26,12 @@ import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
+// Painel inicial: resumo do mês, gráfico de faturamento, tarefas de hoje e leads recentes.
+// O administrador vê a empresa toda; o vendedor vê só os próprios números.
 export default async function DashboardPage({ params }: PageProps<"/app/[slug]/dashboard">) {
   const { slug } = await params;
   const ws = await requireWorkspace(slug);
+  // Define os períodos (este mês e últimos 12 meses) e se os números são da empresa toda ou só da pessoa.
   const tz = ws.company.timezone;
   const month = periodRange("this_month", tz);
   const year = periodRange("last_12m", tz);
@@ -36,6 +39,7 @@ export default async function DashboardPage({ params }: PageProps<"/app/[slug]/d
   const onlyUser = ws.isAdmin ? undefined : ws.user.id;
   const supabase = await createClient();
 
+  // Busca todas as informações do painel ao mesmo tempo.
   const [lookups, summary, monthly, counts, todayTasks, recent, unassigned] = await Promise.all([
     getLookups(ws.company.id),
     getSummary(ws.company.id, { from: month.from.toISOString(), to: month.to.toISOString(), seller }),
@@ -70,6 +74,7 @@ export default async function DashboardPage({ params }: PageProps<"/app/[slug]/d
         description={ws.isAdmin ? "Visão geral da empresa neste mês." : "Seus resultados neste mês."}
       />
 
+      {/* Aviso para o administrador quando há leads sem responsável. */}
       {ws.isAdmin && (unassigned.count ?? 0) > 0 ? (
         <Link
           href={`${base}/leads?responsavel=none`}
@@ -82,6 +87,7 @@ export default async function DashboardPage({ params }: PageProps<"/app/[slug]/d
         </Link>
       ) : null}
 
+      {/* Cartões com os números do mês. */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Faturamento no mês"
@@ -100,6 +106,7 @@ export default async function DashboardPage({ params }: PageProps<"/app/[slug]/d
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+        {/* Gráfico de faturamento dos últimos 12 meses. */}
         <Card>
           <CardHeader>
             <CardTitle>Faturamento — últimos 12 meses</CardTitle>
@@ -118,6 +125,7 @@ export default async function DashboardPage({ params }: PageProps<"/app/[slug]/d
         </Card>
 
         <div className="space-y-6">
+          {/* Tarefas de hoje e quantidade de tarefas atrasadas. */}
           <Card>
             <CardHeader>
               <CardTitle>Minhas tarefas de hoje</CardTitle>
@@ -146,6 +154,7 @@ export default async function DashboardPage({ params }: PageProps<"/app/[slug]/d
               />
             </CardContent>
           </Card>
+          {/* Últimos leads cadastrados. */}
           <Card>
             <CardHeader>
               <CardTitle>Leads recentes</CardTitle>

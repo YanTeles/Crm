@@ -33,6 +33,7 @@ export function useUrlState() {
   return { params, set, pending };
 }
 
+// Botões de página anterior e próxima, mostrando quantos itens estão sendo exibidos.
 export function Pagination({ page, pageSize, total }: { page: number; pageSize: number; total: number }) {
   const pathname = usePathname();
   const params = useSearchParams();

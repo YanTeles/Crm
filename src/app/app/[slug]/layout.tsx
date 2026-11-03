@@ -21,12 +21,15 @@ import { NotificationBell } from "@/features/notifications/components/notificati
 import { getWorkspace, isPlatformAdmin, requireUser } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 
+// Estrutura de todas as telas internas da empresa: menu lateral, barra do topo e o conteúdo da página.
 export default async function WorkspaceLayout({ children, params }: LayoutProps<"/app/[slug]">) {
   const { slug } = await params;
   const user = await requireUser(`/app/${slug}`);
   const ws = await getWorkspace(slug);
   if (!ws) notFound();
 
+  // Se a empresa está suspensa ou o acesso da pessoa foi desativado,
+  // mostra uma tela de bloqueio no lugar do sistema.
   if (ws.company.status !== "active" || ws.membership.status !== "active") {
     const suspended = ws.company.status !== "active";
     return (
@@ -51,6 +54,7 @@ export default async function WorkspaceLayout({ children, params }: LayoutProps<
     );
   }
 
+  // Busca as empresas da pessoa para o seletor de empresas do menu.
   const supabase = await createClient();
   const { data: memberships } = await supabase
     .from("company_members")
@@ -60,6 +64,7 @@ export default async function WorkspaceLayout({ children, params }: LayoutProps<
   const companies = (memberships ?? []).flatMap((m) => (m.companies ? [m.companies] : []));
   const platformAdmin = await isPlatformAdmin();
 
+  // Deixa as informações da empresa e da pessoa disponíveis para todas as partes da tela.
   return (
     <WorkspaceProvider
       value={{
@@ -78,6 +83,7 @@ export default async function WorkspaceLayout({ children, params }: LayoutProps<
         <SidebarProvider>
           <AppSidebar companies={companies} platformAdmin={platformAdmin} />
           <SidebarInset>
+            {/* Barra do topo: botão do menu, nome da empresa, notificações, tema e menu do usuário. */}
             <header className="bg-background/95 supports-[backdrop-filter]:bg-background/70 sticky top-0 z-20 flex h-14 items-center gap-2 border-b px-3 backdrop-blur sm:px-4">
               <SidebarTrigger aria-label="Alternar menu" />
               <Separator orientation="vertical" className="mr-1 h-5" />
@@ -88,6 +94,7 @@ export default async function WorkspaceLayout({ children, params }: LayoutProps<
                 <UserMenu name={user.fullName} email={user.email} />
               </div>
             </header>
+            {/* Conteúdo da página aberta. */}
             <div className="flex-1 p-4 sm:p-6">{children}</div>
           </SidebarInset>
         </SidebarProvider>

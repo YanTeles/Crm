@@ -11,6 +11,7 @@ import { requireUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = { title: "Meu perfil" };
 
+// Página de perfil: a pessoa pode mudar o nome e a senha.
 export default async function ProfilePage() {
   const user = await requireUser("/perfil");
   return (
@@ -27,6 +28,7 @@ export default async function ProfilePage() {
             <ArrowLeft /> Voltar ao CRM
           </Link>
         </Button>
+        {/* Cartão para alterar o nome. */}
         <Card>
           <CardHeader>
             <CardTitle>Dados pessoais</CardTitle>
@@ -36,6 +38,7 @@ export default async function ProfilePage() {
             <ProfileNameForm defaultName={user.fullName} />
           </CardContent>
         </Card>
+        {/* Cartão para alterar a senha. */}
         <Card>
           <CardHeader>
             <CardTitle>Alterar senha</CardTitle>

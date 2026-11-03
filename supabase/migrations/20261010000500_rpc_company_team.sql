@@ -3,10 +3,13 @@
 -- Todas SECURITY DEFINER com search_path vazio e checagem explícita de
 -- autorização no início.
 -- =============================================================================
+-- Em resumo: operações da empresa e da equipe (criar empresa, configurações,
+-- convites, papéis e acesso dos membros, suspensão pela plataforma).
 
 -- -----------------------------------------------------------------------------
 -- Onboarding: cria empresa + admin + configurações iniciais (idempotente)
 -- -----------------------------------------------------------------------------
+-- Cria a empresa, coloca quem criou como administrador e monta o funil e as listas iniciais.
 create function public.bootstrap_company(p_name text)
 returns table (company_id uuid, slug text)
 language plpgsql
@@ -162,6 +165,7 @@ $$;
 -- -----------------------------------------------------------------------------
 -- Convites
 -- -----------------------------------------------------------------------------
+-- Cria um convite com um código secreto que vale por 7 dias.
 create function public.create_invitation(p_company_id uuid, p_email text, p_role public.member_role default 'seller')
 returns table (invitation_id uuid, token text, expires_at timestamptz)
 language plpgsql
@@ -206,6 +210,7 @@ begin
 end;
 $$;
 
+-- Cancela um convite pendente.
 create function public.revoke_invitation(p_invitation_id uuid)
 returns void
 language plpgsql
@@ -259,6 +264,7 @@ begin
 end;
 $$;
 
+-- Aceita o convite: confere código, validade e e-mail, e coloca a pessoa na empresa.
 create function public.accept_invitation(p_token text)
 returns text
 language plpgsql
@@ -364,6 +370,7 @@ begin
 end;
 $$;
 
+-- Ativa ou desativa o acesso de um membro (a empresa nunca fica sem administrador).
 create function public.set_member_status(p_member_id uuid, p_status public.member_status)
 returns void
 language plpgsql

@@ -22,6 +22,7 @@ import { markLeadLost, markLeadWon } from "../actions";
 
 type LeadRef = { id: string; name: string; row_version: number };
 
+// Janela para marcar como ganho: pede o valor.
 export function WonDialog({
   lead,
   open,
@@ -85,6 +86,7 @@ export function WonDialog({
   );
 }
 
+// Janela para marcar como perdido: pede o motivo e uma observação opcional.
 export function LostDialog({
   lead,
   reasons,

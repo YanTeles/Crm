@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+// Cabeçalho das páginas: título, descrição e botões à direita.
 export function PageHeader({
   title,
   description,

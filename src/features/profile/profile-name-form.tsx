@@ -7,6 +7,7 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { updateProfileName } from "./actions";
 
+// Formulário com o campo de nome e o botão de salvar.
 export function ProfileNameForm({ defaultName }: { defaultName: string }) {
   const [name, setName] = useState(defaultName);
   const [pending, startTransition] = useTransition();

@@ -24,6 +24,8 @@ import { CustomFieldInputs, type CustomValueMap } from "./custom-field-inputs";
 
 const NONE = "__none__";
 
+// Formulário de cadastro e edição de lead: nome, telefone, e-mail, empresa, origem,
+// observações, campos extras e escolha do responsável.
 export function LeadForm({
   lookups,
   lead,
@@ -54,6 +56,7 @@ export function LeadForm({
     ws.isAdmin && ws.autoDistribution ? { mode: "auto" } : { mode: "none" },
   );
 
+  // Valores iniciais do formulário (vazios no cadastro, preenchidos na edição).
   const form = useForm<LeadFormInput>({
     resolver: zodResolver(leadFormFields),
     defaultValues: {
@@ -71,6 +74,7 @@ export function LeadForm({
   const sellers = lookups.members.filter((m) => m.role === "seller" && m.status === "active");
   const sources = lookups.sources.filter((s) => s.is_active || s.id === lead?.source_id);
 
+  // Ao sair do campo de telefone, procura leads com o mesmo número e avisa sobre possível repetição.
   async function onPhoneBlur(phone: string) {
     if (!phone) return setDuplicates(null);
     const r = await checkDuplicates({ companyId: ws.companyId, phone, excludeLeadId: lead?.id });
@@ -126,6 +130,7 @@ export function LeadForm({
     });
   });
 
+  // Campos do formulário e botões de salvar e cancelar.
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-6">
       <FieldGroup>

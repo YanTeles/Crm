@@ -1,3 +1,5 @@
+// Teste do rodízio de vendedores: cadastra vários leads ao mesmo tempo e confere
+// se cada vendedor recebeu a mesma quantidade (30 leads para 3 vendedores = 10 para cada).
 import { randomUUID } from "node:crypto";
 import pg from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";

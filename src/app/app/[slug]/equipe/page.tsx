@@ -13,15 +13,18 @@ import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Equipe" };
 
+// Verifica se um convite já venceu.
 function isExpired(iso: string) {
   return new Date(iso).getTime() < new Date().getTime();
 }
 
+// Página da equipe (só administradores): membros e convites pendentes.
 export default async function TeamPage({ params }: PageProps<"/app/[slug]/equipe">) {
   const { slug } = await params;
   const ws = await requireWorkspace(slug, { admin: true });
   const supabase = await createClient();
 
+  // Busca os membros, quantos leads cada um tem e os convites ainda não aceitos.
   const [lookups, counts, invitations] = await Promise.all([
     getLookups(ws.company.id),
     supabase.rpc("count_leads_by_member", { p_company_id: ws.company.id }),
@@ -44,6 +47,7 @@ export default async function TeamPage({ params }: PageProps<"/app/[slug]/equipe
         actions={<InviteDialog />}
       />
 
+      {/* Tabela de membros com papel, situação, quantidade de leads e ações. */}
       <Card>
         <CardContent className="px-0">
           <Table>
@@ -103,6 +107,7 @@ export default async function TeamPage({ params }: PageProps<"/app/[slug]/equipe
         </CardContent>
       </Card>
 
+      {/* Lista de convites pendentes, com botão para cancelar cada um. */}
       <Card className="mt-6">
         <CardHeader>
           <CardTitle>Convites pendentes</CardTitle>

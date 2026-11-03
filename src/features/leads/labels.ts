@@ -1,6 +1,7 @@
 import { formatCurrency } from "@/lib/format";
 import type { Tables } from "@/types/database";
 
+// Nomes em português dos canais de contato.
 export const CHANNEL_LABEL: Record<string, string> = {
   phone: "Telefone",
   whatsapp: "WhatsApp",
@@ -9,6 +10,7 @@ export const CHANNEL_LABEL: Record<string, string> = {
   other: "Outro",
 };
 
+// Nomes em português dos dados do lead.
 const FIELD_LABEL: Record<string, string> = {
   name: "nome",
   phone_raw: "telefone",
@@ -19,6 +21,7 @@ const FIELD_LABEL: Record<string, string> = {
   notes: "observações",
 };
 
+// Formas como um lead pode ter sido entregue a um responsável.
 const METHOD_LABEL: Record<string, string> = {
   rotation: "rodízio automático",
   manual: "atribuição manual",

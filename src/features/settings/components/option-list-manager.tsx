@@ -12,6 +12,8 @@ import type { NamedOption } from "@/features/workspace/lookups";
 import { createOption, deleteOption, updateOption } from "../actions";
 
 // Origens e motivos de perda: itens usados não são excluídos — são desativados.
+// Tela genérica para gerenciar uma lista de opções (origens ou motivos de perda):
+// adicionar, renomear, ativar/desativar e excluir.
 export function OptionListManager({
   table,
   items,

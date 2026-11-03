@@ -6,6 +6,7 @@ import type { MemberOption } from "@/features/workspace/lookups";
 
 const ALL = "__all__";
 
+// Seletor para filtrar o quadro por responsável (todos, sem responsável ou uma pessoa).
 export function AssigneeFilter({ members }: { members: MemberOption[] }) {
   const { params, set } = useUrlState();
   return (

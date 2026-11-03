@@ -9,6 +9,7 @@ import { requireWorkspace } from "@/lib/auth/session";
 
 export const metadata: Metadata = { title: "Tarefas" };
 
+// Mensagem mostrada quando não há tarefas em cada aba.
 const EMPTY: Record<TaskView, string> = {
   hoje: "Nenhuma tarefa para hoje.",
   atrasadas: "Nenhuma tarefa atrasada. Muito bem!",
@@ -16,10 +17,12 @@ const EMPTY: Record<TaskView, string> = {
   concluidas: "Nenhuma tarefa concluída ainda.",
 };
 
+// Página de tarefas, separada em hoje, atrasadas, próximas e concluídas.
 export default async function TasksPage({ params, searchParams }: PageProps<"/app/[slug]/tarefas">) {
   const { slug } = await params;
   const ws = await requireWorkspace(slug);
   const sp = await searchParams;
+  // Lê a aba escolhida. O vendedor vê só as próprias tarefas; o administrador pode filtrar por pessoa.
   const view = (TASK_VIEWS.find((v) => v.value === sp.visao)?.value ?? "hoje") as TaskView;
   const assignee =
     ws.isAdmin && typeof sp.responsavel === "string" && /^[0-9a-f-]{36}$/i.test(sp.responsavel)
@@ -27,6 +30,7 @@ export default async function TasksPage({ params, searchParams }: PageProps<"/ap
       : undefined;
   const onlyUser = ws.isAdmin ? assignee : ws.user.id;
 
+  // Busca as tarefas e os contadores de cada aba.
   const [lookups, tasks, counts] = await Promise.all([
     getLookups(ws.company.id),
     listTasks(ws.company.id, ws.company.timezone, view, { onlyUser }),

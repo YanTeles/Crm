@@ -15,6 +15,7 @@ import {
 import { signOut } from "@/features/auth/actions";
 import { initials } from "@/lib/text";
 
+// Menu do usuário no canto da tela: nome, e-mail, link para o perfil e botão de sair.
 export function UserMenu({ name, email }: { name: string; email: string }) {
   return (
     <DropdownMenu>

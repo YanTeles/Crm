@@ -1,6 +1,8 @@
 -- =============================================================================
 -- RPCs: vendas, relatórios, agendamento e permissões de execução
 -- =============================================================================
+-- Em resumo: operações de vendas (registrar, editar, concluir, cancelar)
+-- e os cálculos dos relatórios.
 
 -- -----------------------------------------------------------------------------
 -- Vendas (independentes do resultado do lead)
@@ -18,6 +20,7 @@ begin
 end;
 $$;
 
+-- Confere se a data de conclusão é válida (não pode ser no futuro).
 create function private.validate_completed_at(p_value timestamptz)
 returns void
 language plpgsql
@@ -31,6 +34,7 @@ begin
 end;
 $$;
 
+-- Registra uma nova venda ligada a um lead.
 create function public.create_sale(
   p_lead_id uuid,
   p_description text,
@@ -150,6 +154,7 @@ begin
 end;
 $$;
 
+-- Altera uma venda (vendas canceladas não podem ser alteradas).
 create function public.update_sale(
   p_sale_id uuid,
   p_description text,
@@ -218,6 +223,7 @@ begin
 end;
 $$;
 
+-- Conclui uma venda pendente; a partir daí ela conta no faturamento.
 create function public.complete_sale(p_sale_id uuid, p_completed_at timestamptz default null, p_expected_version integer default null)
 returns integer
 language plpgsql
@@ -245,6 +251,7 @@ begin
 end;
 $$;
 
+-- Cancela uma venda, com motivo obrigatório.
 create function public.cancel_sale(p_sale_id uuid, p_reason text, p_expected_version integer default null)
 returns integer
 language plpgsql
@@ -298,6 +305,7 @@ $$;
 
 grant execute on function private.report_scope(uuid, uuid) to authenticated;
 
+-- Calcula os números do resumo: faturamento, vendas, valor médio, conversão, ganhos e perdas.
 create function public.report_summary(
   p_company_id uuid,
   p_from timestamptz,
@@ -380,6 +388,7 @@ begin
 end;
 $$;
 
+-- Calcula os números mês a mês para os gráficos.
 create function public.report_monthly(
   p_company_id uuid,
   p_from timestamptz,
@@ -437,6 +446,7 @@ begin
 end;
 $$;
 
+-- Calcula os resultados de cada vendedor para o ranking.
 create function public.report_by_seller(p_company_id uuid, p_from timestamptz, p_to timestamptz)
 returns table (user_id uuid, full_name text, member_status public.member_status, revenue numeric,
                sales_count bigint, leads_assigned bigint, leads_won bigint)
@@ -470,6 +480,7 @@ begin
 end;
 $$;
 
+-- Conta quantos leads vieram de cada origem.
 create function public.report_by_source(
   p_company_id uuid,
   p_from timestamptz,
@@ -496,6 +507,7 @@ begin
 end;
 $$;
 
+-- Conta quantas oportunidades foram perdidas por cada motivo.
 create function public.report_lost_reasons(
   p_company_id uuid,
   p_from timestamptz,

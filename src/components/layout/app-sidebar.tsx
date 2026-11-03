@@ -44,12 +44,14 @@ import {
 type Company = { name: string; slug: string };
 type NavItem = { href: string; label: string; icon: React.ComponentType };
 
+// Menu lateral: seletor de empresa no topo e links para as páginas do sistema.
 export function AppSidebar({ companies, platformAdmin }: { companies: Company[]; platformAdmin: boolean }) {
   const ws = useWorkspace();
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
   const base = `/app/${ws.slug}`;
 
+  // Links principais. Para vendedores, os nomes mudam para "Meus leads", "Minhas vendas" etc.
   const main: NavItem[] = [
     { href: `${base}/dashboard`, label: "Dashboard", icon: LayoutDashboard },
     { href: `${base}/leads`, label: ws.isAdmin ? "Leads" : "Meus leads", icon: UserSquare2 },
@@ -58,11 +60,13 @@ export function AppSidebar({ companies, platformAdmin }: { companies: Company[];
     { href: `${base}/vendas`, label: ws.isAdmin ? "Vendas" : "Minhas vendas", icon: Receipt },
     { href: `${base}/relatorios`, label: ws.isAdmin ? "Relatórios" : "Meus resultados", icon: BarChart3 },
   ];
+  // Links de gestão, só para administradores.
   const admin: NavItem[] = [
     { href: `${base}/equipe`, label: "Equipe", icon: Users },
     { href: `${base}/configuracoes`, label: "Configurações", icon: Settings },
   ];
 
+  // Desenha um link do menu e destaca o da página que está aberta.
   const renderItem = (i: NavItem) => {
     const active = pathname === i.href || pathname.startsWith(`${i.href}/`);
     return (
@@ -79,6 +83,7 @@ export function AppSidebar({ companies, platformAdmin }: { companies: Company[];
 
   return (
     <Sidebar collapsible="icon">
+      {/* Topo do menu: nome da empresa, que abre a lista para trocar de empresa. */}
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -121,6 +126,7 @@ export function AppSidebar({ companies, platformAdmin }: { companies: Company[];
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+      {/* Links do menu, separados em "Comercial" e "Gestão". */}
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Comercial</SidebarGroupLabel>

@@ -1,3 +1,5 @@
+// Operações com leads que rodam no servidor: cadastrar, editar, trocar responsável,
+// mover de etapa, marcar como ganho ou perdido, reabrir, arquivar e registrar anotações.
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -19,10 +21,12 @@ import {
   type LeadFormValues,
 } from "./schemas";
 
+// Atualiza as telas da empresa depois de uma alteração.
 function refresh(slug: string) {
   if (/^[a-z0-9-]{3,48}$/.test(slug)) revalidatePath(`/app/${slug}`, "layout");
 }
 
+// Organiza os dados do formulário no formato do banco de dados.
 function toPayload(v: LeadFormValues) {
   return {
     name: v.name,
@@ -43,6 +47,7 @@ export type CreateLeadResult = {
   replayed: boolean;
 };
 
+// Cadastra um novo lead, podendo entregá-lo automaticamente a um vendedor (rodízio).
 export async function createLead(input: {
   companyId: string;
   slug: string;
@@ -78,6 +83,7 @@ export async function createLead(input: {
   );
 }
 
+// Salva as alterações de um lead. Se outra pessoa mudou o lead ao mesmo tempo, avisa.
 export async function updateLead(input: {
   leadId: string;
   slug: string;
@@ -112,6 +118,7 @@ export type DuplicateCheck = {
   hidden_count: number;
 };
 
+// Procura leads com o mesmo telefone para avisar sobre um possível cadastro repetido.
 export async function checkDuplicates(input: {
   companyId: string;
   phone: string;
@@ -136,6 +143,7 @@ const assignInput = z.object({
   transferTasks: z.boolean().default(true),
 });
 
+// Troca o responsável de um lead (as tarefas pendentes podem ir junto).
 export async function assignLead(
   input: z.input<typeof assignInput> & { slug: string },
 ): Promise<ActionResult<number>> {
@@ -160,6 +168,7 @@ const transferInput = z.object({
   transferTasks: z.boolean().default(true),
 });
 
+// Passa todos os leads de um vendedor para outro de uma só vez.
 export async function transferMemberLeads(
   input: z.input<typeof transferInput> & { slug: string },
 ): Promise<ActionResult<number>> {
@@ -177,6 +186,7 @@ export async function transferMemberLeads(
   return ok(data, `${data} lead(s) transferido(s).`);
 }
 
+// Muda o lead de etapa no funil.
 export async function moveLeadStage(input: {
   leadId: string;
   stageId: string;
@@ -196,6 +206,7 @@ export async function moveLeadStage(input: {
   return ok(data);
 }
 
+// Marca a oportunidade como ganha, informando o valor.
 export async function markLeadWon(
   input: z.input<typeof wonSchema> & { slug: string },
 ): Promise<ActionResult<number>> {
@@ -212,6 +223,7 @@ export async function markLeadWon(
   return ok(data, "Oportunidade marcada como ganha.");
 }
 
+// Marca a oportunidade como perdida, informando o motivo.
 export async function markLeadLost(
   input: z.input<typeof lostSchema> & { slug: string },
 ): Promise<ActionResult<number>> {
@@ -229,6 +241,7 @@ export async function markLeadLost(
   return ok(data, "Oportunidade marcada como perdida.");
 }
 
+// Reabre uma oportunidade que já tinha sido ganha ou perdida.
 export async function reopenLead(input: {
   leadId: string;
   stageId?: string | null;
@@ -247,6 +260,7 @@ export async function reopenLead(input: {
   return ok(data, "Oportunidade reaberta.");
 }
 
+// Arquiva ou restaura um lead (arquivar esconde o lead sem apagá-lo).
 export async function setLeadArchived(input: {
   leadId: string;
   archived: boolean;
@@ -265,6 +279,7 @@ export async function setLeadArchived(input: {
   return ok(data, input.archived ? "Lead arquivado." : "Lead restaurado.");
 }
 
+// Registra uma anotação ou um contato feito com o lead.
 export async function addInteraction(
   input: z.input<typeof interactionSchema> & { companyId: string; slug: string },
 ): Promise<ActionResult<undefined>> {

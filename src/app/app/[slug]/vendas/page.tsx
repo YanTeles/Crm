@@ -15,10 +15,12 @@ import { periodFromParams } from "@/lib/period";
 
 export const metadata: Metadata = { title: "Vendas" };
 
+// Página de vendas: totais do período e lista de vendas com filtros.
 export default async function SalesPage({ params, searchParams }: PageProps<"/app/[slug]/vendas">) {
   const { slug } = await params;
   const ws = await requireWorkspace(slug);
   const sp = await searchParams;
+  // Lê os filtros escolhidos. O vendedor só vê as próprias vendas; o administrador pode ver as de todos.
   const period = periodFromParams(sp, ws.company.timezone);
   const status = (["pending", "completed", "cancelled"] as const).find((s) => s === sp.status) ?? "all";
   const seller =
@@ -33,6 +35,7 @@ export default async function SalesPage({ params, searchParams }: PageProps<"/ap
     page: Math.max(1, Number(sp.pagina) || 1),
   };
 
+  // Busca ao mesmo tempo as listas da empresa, as vendas e os totais.
   const [lookups, list, summary] = await Promise.all([
     getLookups(ws.company.id),
     listSales(ws.company.id, filters),
@@ -47,6 +50,7 @@ export default async function SalesPage({ params, searchParams }: PageProps<"/ap
         description="Faturamento considera somente vendas concluídas, pela data de conclusão."
         actions={<SaleDialog members={cl.members} />}
       />
+      {/* Cartões com faturamento, quantidade de vendas, valor médio e vendas pendentes. */}
       <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Faturamento"
@@ -67,6 +71,7 @@ export default async function SalesPage({ params, searchParams }: PageProps<"/ap
           icon={Clock}
         />
       </div>
+      {/* Filtros, tabela de vendas e troca de página. */}
       <SalesFilters members={cl.members} isAdmin={ws.isAdmin} />
       <SalesTable rows={list.rows} members={cl.members} />
       <Pagination page={filters.page} pageSize={SALES_PAGE_SIZE} total={list.total} />

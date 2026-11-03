@@ -1,3 +1,4 @@
+// Funções que deixam números, valores em reais, porcentagens e datas no formato brasileiro.
 const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 const integer = new Intl.NumberFormat("pt-BR");
 const percent = new Intl.NumberFormat("pt-BR", { style: "percent", maximumFractionDigits: 1 });

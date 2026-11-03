@@ -3,6 +3,7 @@
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { formatCurrency, formatMonth, formatNumber } from "@/lib/format";
 
+// Aparência dos textos dos eixos e formato curto de valores em reais (ex.: R$ 1,2 mil).
 const AXIS = { fontSize: 12, fill: "var(--muted-foreground)" };
 const compactBRL = new Intl.NumberFormat("pt-BR", {
   notation: "compact",
@@ -10,6 +11,7 @@ const compactBRL = new Intl.NumberFormat("pt-BR", {
   currency: "BRL",
 });
 
+// Caixinha que aparece ao passar o mouse sobre o gráfico.
 function TooltipBox({
   title,
   rows,
@@ -34,6 +36,7 @@ function TooltipBox({
 type Monthly = { month: string; revenue: number; sales: number; leads: number; won: number };
 
 // Faturamento mensal (série única, por data de conclusão da venda).
+// Gráfico de área com o faturamento de cada mês.
 export function RevenueChart({ data }: { data: Monthly[] }) {
   return (
     <div className="h-64 w-full" role="img" aria-label="Faturamento por mês">
@@ -84,6 +87,7 @@ export function RevenueChart({ data }: { data: Monthly[] }) {
 }
 
 // Leads criados x leads ganhos por mês (mesma unidade: quantidade).
+// Gráfico de barras comparando, mês a mês, leads criados e leads ganhos.
 export function LeadsChart({ data }: { data: Monthly[] }) {
   return (
     <div className="h-64 w-full" role="img" aria-label="Leads criados e ganhos por mês">
@@ -140,6 +144,7 @@ export function LeadsChart({ data }: { data: Monthly[] }) {
 }
 
 // Barras horizontais de série única com rótulo direto (origens, motivos de perda).
+// Barras horizontais em ordem do maior para o menor (usado em origens e motivos de perda).
 export function RankBars({
   data,
   valueLabel,

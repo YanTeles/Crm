@@ -3,6 +3,7 @@ import { dayRange } from "@/lib/dates";
 import { createClient } from "@/lib/supabase/server";
 import type { TaskItem } from "./components/task-list";
 
+// Abas da tela de tarefas.
 export type TaskView = "hoje" | "proximas" | "atrasadas" | "concluidas";
 export const TASK_VIEWS: { value: TaskView; label: string }[] = [
   { value: "hoje", label: "Hoje" },
@@ -14,6 +15,8 @@ export const TASK_VIEWS: { value: TaskView; label: string }[] = [
 const COLUMNS =
   "id, title, description, status, due_at, completed_at, assigned_to, lead:leads!tasks_lead_fk(id, name)";
 
+// Busca as tarefas de uma aba: hoje, próximas, atrasadas ou concluídas
+// (sempre considerando o fuso horário da empresa).
 export async function listTasks(
   companyId: string,
   timezone: string,
@@ -51,6 +54,7 @@ export async function listTasks(
   return (data ?? []) as unknown as TaskItem[];
 }
 
+// Conta quantas tarefas há hoje e quantas estão atrasadas (para mostrar nas abas e no painel).
 export async function countTasks(companyId: string, timezone: string, onlyUser?: string) {
   const supabase = await createClient();
   const now = new Date();

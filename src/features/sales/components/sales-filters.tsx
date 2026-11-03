@@ -7,6 +7,7 @@ import type { MemberOption } from "@/features/workspace/lookups";
 
 const ALL = "__all__";
 
+// Filtros da lista de vendas: período, situação e vendedor (só administradores).
 export function SalesFilters({ members, isAdmin }: { members: MemberOption[]; isAdmin: boolean }) {
   const { params, set } = useUrlState();
   return (

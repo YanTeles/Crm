@@ -20,6 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import type { StageOption } from "@/features/workspace/lookups";
 import { archiveStage, createStage, renameStage, reorderStages, setDefaultStage } from "../actions";
 
+// Tela de etapas do funil: criar, renomear, mudar a ordem, escolher a etapa inicial e remover.
 export function StagesManager({
   stages,
   leadCounts,
@@ -38,6 +39,7 @@ export function StagesManager({
   const open = active.filter((s) => s.kind === "open");
   const closed = active.filter((s) => s.kind !== "open");
 
+  // Sobe ou desce uma etapa na ordem.
   function move(index: number, delta: number) {
     const ids = open.map((s) => s.id);
     const [item] = ids.splice(index, 1);
@@ -45,6 +47,7 @@ export function StagesManager({
     run(() => reorderStages({ companyId: ws.companyId, stageIds: ids, slug: ws.slug }));
   }
 
+  // Desenha uma linha da lista de etapas, com seus botões.
   const row = (s: StageOption, index?: number) => (
     <li key={s.id} className="flex items-center gap-2 py-2">
       {editing?.id === s.id ? (

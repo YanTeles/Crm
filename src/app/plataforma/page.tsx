@@ -20,11 +20,13 @@ export const metadata: Metadata = { title: "Plataforma" };
 
 // Superadministrador: gerencia empresas sem acesso aos dados comerciais (D8).
 export default async function PlatformPage({ searchParams }: PageProps<"/plataforma">) {
+  // Só deixa entrar quem administra a plataforma e lê o texto digitado na busca.
   const user = await requireUser("/plataforma");
   if (!(await isPlatformAdmin())) notFound();
   const sp = await searchParams;
   const q = typeof sp.q === "string" ? sp.q.slice(0, 100) : "";
 
+  // Busca o resumo de todas as empresas e calcula os totais.
   const supabase = await createClient();
   const { data: companies = [] } = await supabase.rpc("platform_overview", { p_search: q || null });
   const list = companies ?? [];
@@ -47,6 +49,7 @@ export default async function PlatformPage({ searchParams }: PageProps<"/platafo
           title="Administração da plataforma"
           description="Indicadores operacionais agregados. Dados comerciais das empresas não são exibidos."
         />
+        {/* Cartões com os totais. */}
         <div className="mb-6 grid gap-3 sm:grid-cols-3">
           <StatCard label="Empresas" value={formatNumber(list.length)} icon={Building2} />
           <StatCard
@@ -57,6 +60,7 @@ export default async function PlatformPage({ searchParams }: PageProps<"/platafo
           />
           <StatCard label="Usuários ativos" value={formatNumber(members)} icon={Users} />
         </div>
+        {/* Campo de busca de empresas. */}
         <form className="mb-4 max-w-sm">
           <Input
             name="q"
@@ -65,6 +69,7 @@ export default async function PlatformPage({ searchParams }: PageProps<"/platafo
             aria-label="Pesquisar empresas"
           />
         </form>
+        {/* Tabela com as empresas e o botão de suspender ou reativar cada uma. */}
         <Card>
           <CardContent className="px-0">
             <Table>

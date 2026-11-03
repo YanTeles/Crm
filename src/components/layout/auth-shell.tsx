@@ -4,6 +4,7 @@ import { BrandMark } from "@/components/layout/brand-mark";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
+// Moldura das telas de login e cadastro: logotipo no topo e um cartão centralizado com o conteúdo.
 export function AuthShell({
   title,
   description,

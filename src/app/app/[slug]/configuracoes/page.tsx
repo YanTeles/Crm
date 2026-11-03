@@ -11,6 +11,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Configurações" };
 
+// Página de configurações (só para administradores).
 export default async function SettingsPage({ params }: PageProps<"/app/[slug]/configuracoes">) {
   const { slug } = await params;
   const ws = await requireWorkspace(slug, { admin: true });
@@ -34,6 +35,7 @@ export default async function SettingsPage({ params }: PageProps<"/app/[slug]/co
   return (
     <>
       <PageHeader title="Configurações" description="Ajustes da empresa, funil, campos e listas." />
+      {/* Abas: dados da empresa, etapas do funil, campos extras, origens dos leads e motivos de perda. */}
       <Tabs defaultValue="empresa">
         <TabsList className="mb-4 flex-wrap">
           <TabsTrigger value="empresa">Empresa</TabsTrigger>

@@ -9,6 +9,7 @@ import { requireWorkspace } from "@/lib/auth/session";
 
 export const metadata: Metadata = { title: "Funil" };
 
+// Gera uma "impressão digital" do quadro; quando algum cartão muda, o quadro é redesenhado.
 // Remonta o quadro quando os dados do servidor mudam (após router.refresh).
 function boardKey(board: Awaited<ReturnType<typeof getBoard>>) {
   let h = 5381;
@@ -18,13 +19,16 @@ function boardKey(board: Awaited<ReturnType<typeof getBoard>>) {
   return String(h);
 }
 
+// Página do funil de vendas: quadro com uma coluna para cada etapa.
 export default async function PipelinePage({ params, searchParams }: PageProps<"/app/[slug]/funil">) {
   const { slug } = await params;
   const ws = await requireWorkspace(slug);
   const sp = await searchParams;
+  // Administradores podem filtrar o quadro por responsável.
   const raw = typeof sp.responsavel === "string" ? sp.responsavel : undefined;
   const assignee = ws.isAdmin && raw && (raw === "none" || /^[0-9a-f-]{36}$/i.test(raw)) ? raw : undefined;
 
+  // Busca as etapas e os cartões do quadro.
   const lookups = await getLookups(ws.company.id);
   const board = await getBoard(ws.company.id, lookups.stages, { assignee });
   const cl = clientLookups(lookups);
@@ -45,6 +49,7 @@ export default async function PipelinePage({ params, searchParams }: PageProps<"
           </>
         }
       />
+      {/* Quadro com os cartões, que podem ser arrastados entre as etapas. */}
       <KanbanBoard
         key={boardKey(board) + (assignee ?? "")}
         initial={board}

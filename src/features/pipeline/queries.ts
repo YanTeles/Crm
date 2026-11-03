@@ -2,8 +2,10 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { StageOption } from "@/features/workspace/lookups";
 
+// Quantos cartões cada coluna carrega por vez.
 export const KANBAN_PAGE = 30;
 
+// Informações de cada cartão do quadro.
 export type KanbanCard = {
   id: string;
   name: string;
@@ -20,6 +22,8 @@ export const CARD_COLUMNS =
   "id, name, customer_company, assigned_to, stage_id, outcome, won_amount, row_version, updated_at";
 
 // Primeira página de cada coluna. Colunas de Ganho/Perdido mostram fechamentos dos últimos 30 dias.
+// Busca os cartões do quadro, separados por etapa, com o total de cada coluna.
+// Leads encerrados há muito tempo não aparecem, para o quadro não ficar cheio.
 export async function getBoard(
   companyId: string,
   stages: StageOption[],

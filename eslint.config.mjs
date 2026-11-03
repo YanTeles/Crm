@@ -1,3 +1,4 @@
+// Configuração do verificador que aponta erros e padrões ruins no código.
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";

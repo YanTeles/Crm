@@ -1,3 +1,5 @@
+// Testes das funções de apoio: telefone, valores em reais, datas e fusos horários,
+// proteção de redirecionamento e mensagens de erro.
 import { describe, expect, it } from "vitest";
 import { normalizePhone, whatsappUrl } from "@/lib/phone";
 import { parseMoney, formatCurrency } from "@/lib/format";

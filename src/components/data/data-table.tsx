@@ -18,6 +18,7 @@ export function DataTable<T>({
   onRowClick?: (row: T) => void;
   getRowId?: (row: T) => string;
 }) {
+  // Organiza as linhas e colunas recebidas.
   const table = useReactTable({
     data,
     columns,
@@ -26,6 +27,7 @@ export function DataTable<T>({
     getRowId,
   });
 
+  // Desenha a tabela: cabeçalho e linhas; se não houver nada, mostra uma mensagem.
   return (
     <div className="bg-card overflow-hidden rounded-xl border">
       <Table>

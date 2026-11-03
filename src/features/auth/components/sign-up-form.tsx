@@ -16,6 +16,7 @@ import { resendConfirmation, signUp } from "../actions";
 import { signUpCompanySchema, signUpSchema, type SignUpInput } from "../schemas";
 import { Turnstile } from "./turnstile";
 
+// Formulário de cadastro. Para quem recebeu convite, não pede o nome da empresa.
 export function SignUpForm({
   invitationToken,
   turnstileSiteKey,
@@ -31,6 +32,7 @@ export function SignUpForm({
   const { pending, onSubmit } = useActionSubmit(form, signUp, { onSuccess: (d) => setSentTo(d.email) });
   const onToken = useCallback((t: string | undefined) => form.setValue("captchaToken", t), [form]);
 
+  // Depois de cadastrar, mostra o aviso para confirmar o e-mail e um botão para reenviá-lo.
   if (sentTo) {
     return (
       <div className="space-y-4">
@@ -57,6 +59,7 @@ export function SignUpForm({
     );
   }
 
+  // Atalho para criar campos de texto sem repetir código.
   const text = (
     name: keyof SignUpInput,
     label: string,
@@ -77,6 +80,7 @@ export function SignUpForm({
     </FormField>
   );
 
+  // Campos do formulário.
   return (
     <form onSubmit={onSubmit} noValidate>
       <FieldGroup>

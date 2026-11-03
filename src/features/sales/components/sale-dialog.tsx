@@ -35,18 +35,21 @@ export type EditableSale = {
   row_version: number;
 };
 
+// Data de hoje no fuso da empresa (valor inicial do campo de data).
 function today(tz: string) {
   const t = todayInZone(tz);
   return `${t.year}-${String(t.month).padStart(2, "0")}-${String(t.day).padStart(2, "0")}`;
 }
 
 // Data informada (dia) → meio-dia no fuso da empresa; hoje → agora (evita data futura).
+// Converte a data escolhida para o formato salvo no banco.
 function dateToIso(value: string, tz: string) {
   if (value === today(tz)) return new Date().toISOString();
   const start = localDateToIso(value, tz);
   return start ? new Date(new Date(start).getTime() + 12 * 3600 * 1000).toISOString() : null;
 }
 
+// Janela de nova venda ou de edição: lead, descrição, valor, vendedor, situação e data de conclusão.
 export function SaleDialog({
   members,
   fixedLead,
@@ -71,6 +74,7 @@ export function SaleDialog({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formKey, setFormKey] = useState(0);
 
+  // Limpa o formulário ao abrir a janela.
   function reset() {
     setRequestId(crypto.randomUUID());
     setLead(fixedLead ?? null);
@@ -85,6 +89,7 @@ export function SaleDialog({
     setFormKey((k) => k + 1);
   }
 
+  // Confere os dados e salva a venda (nova ou editada).
   function submit(e: React.FormEvent) {
     e.preventDefault();
     const errs: Record<string, string> = {};

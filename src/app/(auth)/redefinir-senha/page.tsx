@@ -8,6 +8,7 @@ export const metadata: Metadata = { title: "Redefinir senha" };
 
 // Acessada pelo link de recuperação (/auth/confirm cria a sessão antes).
 export default async function ResetPasswordPage() {
+  // Se a pessoa não veio de um link válido, volta para o login.
   if (!(await getCurrentUser())) redirect("/entrar?erro=link");
   return (
     <AuthShell title="Definir nova senha" description="Escolha uma nova senha para sua conta.">

@@ -23,6 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { formatDateTime } from "@/lib/format";
 import { createInvitation } from "../actions";
 
+// Janela para convidar uma pessoa: informa e-mail e papel, e mostra o link do convite para copiar.
 export function InviteDialog() {
   const ws = useWorkspace();
   const [open, setOpen] = useState(false);
